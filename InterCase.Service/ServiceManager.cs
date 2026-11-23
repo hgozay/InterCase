@@ -15,8 +15,16 @@ namespace InterCase.Service
         IQueueService queue,
         ICorrelationContext correlation,
         IOptions<CacheOptions> cacheOptions,
+        IOptions<ProcessingOptions> processingOptions,
+        TimeProvider timeProvider,
         ILoggerFactory loggerFactory) : IServiceManager
     {
+        private readonly Lazy<IUserService> _user = new(() => new UserService(
+            repositoryManager,
+            mapper,
+            timeProvider,
+            loggerFactory.CreateLogger<UserService>()));
+
         private readonly Lazy<IOrderService> _order = new(() => new OrderService(
             repositoryManager,
             mapper,
@@ -24,8 +32,11 @@ namespace InterCase.Service
             queue,
             correlation,
             cacheOptions,
+            processingOptions,
+            timeProvider,
             loggerFactory.CreateLogger<OrderService>()));
 
+        public IUserService User => _user.Value;
         public IOrderService Order => _order.Value;
         public ICacheService Cache => cache;
         public IQueueService Queue => queue;

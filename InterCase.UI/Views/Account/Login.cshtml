@@ -1,0 +1,66 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = UiText.LoginTitle;
+    var demoLogin = ViewData["DemoLogin"] as DemoLoginViewModel;
+    var notice = ViewData["Notice"] as string;
+    var error = ViewData["Error"] as string;
+}
+
+<section class="auth">
+    <div class="card auth-card">
+        <div class="auth-mark" aria-hidden="true">IC</div>
+        <h1>@UiText.LoginTitle</h1>
+        <p class="muted">@UiText.LoginSubtitle</p>
+
+        @if (notice is not null)
+        {
+            <div class="alert alert-info" role="status">@notice</div>
+        }
+
+        @if (error is not null)
+        {
+            <div class="alert alert-error" role="alert">
+                <strong>@error</strong>
+                <div asp-validation-summary="ModelOnly"></div>
+            </div>
+        }
+
+        <form method="post" asp-controller="Account" asp-action="Login" class="form" novalidate data-busy-text="@UiText.SigningIn">
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div class="field">
+                <label asp-for="Username" class="label">@UiText.Username</label>
+                <input asp-for="Username" class="input" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus />
+                <span asp-validation-for="Username" class="field-error"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Password" class="label">@UiText.Password</label>
+                <input asp-for="Password" type="password" class="input" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">@UiText.SignIn</button>
+        </form>
+
+        @if (demoLogin is not null)
+        {
+            <section class="demo-users" aria-labelledby="demo-users-title">
+                <h2 id="demo-users-title" class="demo-users-title">@UiText.DemoAccounts</h2>
+                <p class="demo-users-hint">@UiText.DemoAccountsHint</p>
+                <ul class="demo-user-list">
+                    @foreach (var demoUser in demoLogin.Users)
+                    {
+                        <li class="demo-user">
+                            <span class="demo-user-name">
+                                <strong>@demoUser.DisplayName</strong>
+                                <code>@demoUser.Username</code>
+                            </span>
+                            <button type="button" class="btn btn-ghost btn-sm" data-fill-demo data-username="@demoUser.Username" data-password="@demoLogin.Password" aria-label="@UiText.FillDemo: @demoUser.DisplayName">@UiText.FillDemo</button>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+    </div>
+</section>

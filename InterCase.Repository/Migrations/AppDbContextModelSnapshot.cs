@@ -75,8 +75,8 @@ namespace InterCase.Repository.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -88,6 +88,9 @@ namespace InterCase.Repository.Migrations
                     b.HasIndex("PublicId")
                         .IsUnique()
                         .HasDatabaseName("ix_notifications_public_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_notifications_user_id");
 
                     b.ToTable("notifications", (string)null);
                 });
@@ -145,8 +148,8 @@ namespace InterCase.Repository.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -162,6 +165,144 @@ namespace InterCase.Repository.Migrations
                     b.ToTable("orders", (string)null);
                 });
 
+            modelBuilder.Entity("InterCase.Repository.Entities.User", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("display_name");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsDemo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_demo");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("password_hash");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("username");
+
+                    b.HasKey("Id")
+                        .HasName("pk_users");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_public_id");
+
+                    b.HasIndex("Username")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_username");
+
+                    b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("InterCase.Repository.Entities.UserLogin", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AccessToken")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("access_token");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTime>("LoggedInAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("logged_in_at");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
+                    b.Property<string>("TokenId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("token_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_logins");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_user_logins_public_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_logins_user_id");
+
+                    b.ToTable("user_logins", (string)null);
+                });
+
             modelBuilder.Entity("InterCase.Repository.Entities.Notification", b =>
                 {
                     b.HasOne("InterCase.Repository.Entities.Order", "Order")
@@ -171,12 +312,52 @@ namespace InterCase.Repository.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_notifications_orders_order_id");
 
+                    b.HasOne("InterCase.Repository.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_users_user_id");
+
                     b.Navigation("Order");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("InterCase.Repository.Entities.Order", b =>
+                {
+                    b.HasOne("InterCase.Repository.Entities.User", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_orders_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("InterCase.Repository.Entities.UserLogin", b =>
+                {
+                    b.HasOne("InterCase.Repository.Entities.User", "User")
+                        .WithMany("Logins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_logins_users_user_id");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InterCase.Repository.Entities.Order", b =>
                 {
                     b.Navigation("Notifications");
+                });
+
+            modelBuilder.Entity("InterCase.Repository.Entities.User", b =>
+                {
+                    b.Navigation("Logins");
+
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

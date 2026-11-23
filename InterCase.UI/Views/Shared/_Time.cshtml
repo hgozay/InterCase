@@ -1,0 +1,12 @@
+@model DateTime?
+@if (Model is { } value)
+{
+    <time class="time" datetime="@DisplayFormat.Iso(value)">
+        <span class="time-clock">@DisplayFormat.Clock(value)</span>
+        <span class="time-date">@DisplayFormat.Date(value)</span>
+    </time>
+}
+else
+{
+    <span class="muted">—</span>
+}

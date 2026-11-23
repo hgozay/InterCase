@@ -21,6 +21,11 @@ namespace InterCase.API.Handlers
             var problem = exception switch
             {
                 NotFoundException => new ProblemDetails { Status = StatusCodes.Status404NotFound },
+                ConflictException conflict => new ProblemDetails
+                {
+                    Status = StatusCodes.Status409Conflict,
+                    Detail = Localization.Get(conflict.MessageKey)
+                },
                 BadHttpRequestException => new ProblemDetails
                 {
                     Status = StatusCodes.Status400BadRequest,

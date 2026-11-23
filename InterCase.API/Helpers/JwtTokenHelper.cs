@@ -1,24 +1,26 @@
 using System.Security.Claims;
 using System.Text;
 using InterCase.Common;
-using InterCase.Common.Dtos.Auth;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace InterCase.API.Helpers
 {
+    public sealed record IssuedToken(string AccessToken, string TokenId, DateTime ExpiresAt);
+
     public static class JwtTokenHelper
     {
-        public static TokenResponse CreateToken(JwtOptions options, string username, DateTime nowUtc)
+        public static IssuedToken CreateToken(JwtOptions options, Guid userId, string username, DateTime nowUtc)
         {
+            var tokenId = Guid.NewGuid().ToString("N");
             var expiresAt = nowUtc.AddMinutes(options.ExpiryMinutes);
             var descriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(
                 [
-                    new Claim(JwtRegisteredClaimNames.Sub, username),
+                    new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                     new Claim(JwtRegisteredClaimNames.Name, username),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N"))
+                    new Claim(JwtRegisteredClaimNames.Jti, tokenId)
                 ]),
                 Issuer = options.Issuer,
                 Audience = options.Audience,
@@ -28,7 +30,7 @@ namespace InterCase.API.Helpers
                 SigningCredentials = new SigningCredentials(CreateSigningKey(options), SecurityAlgorithms.HmacSha256)
             };
 
-            return new TokenResponse(new JsonWebTokenHandler().CreateToken(descriptor), expiresAt);
+            return new IssuedToken(new JsonWebTokenHandler().CreateToken(descriptor), tokenId, expiresAt);
         }
 
         public static TokenValidationParameters CreateValidationParameters(JwtOptions options) => new()

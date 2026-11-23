@@ -55,8 +55,8 @@ namespace InterCase.Common
     {
         public const string SectionName = "Cache";
 
-        [EnumDataType(typeof(CacheProvider), ErrorMessage = "Cache:Provider is not a supported cache provider.")]
-        public CacheProvider Provider { get; set; } = CacheProvider.Redis;
+        [EnumDataType(typeof(CacheProvider), ErrorMessage = "Cache:Provider is missing or is not a supported cache provider.")]
+        public CacheProvider Provider { get; set; }
 
         [Range(1, 86400, ErrorMessage = "Cache:OrdersTtlSeconds must be between 1 and 86400.")]
         public int OrdersTtlSeconds { get; set; } = 120;
@@ -66,8 +66,8 @@ namespace InterCase.Common
     {
         public const string SectionName = "Queue";
 
-        [EnumDataType(typeof(QueueProvider), ErrorMessage = "Queue:Provider is not a supported queue provider.")]
-        public QueueProvider Provider { get; set; } = QueueProvider.RabbitMq;
+        [EnumDataType(typeof(QueueProvider), ErrorMessage = "Queue:Provider is missing or is not a supported queue provider.")]
+        public QueueProvider Provider { get; set; }
     }
 
     public class HangfireOptions
@@ -81,9 +81,6 @@ namespace InterCase.Common
     public class DemoUserOptions
     {
         public const string SectionName = "DemoUser";
-
-        [Required(ErrorMessage = "DemoUser:Username is required.")]
-        public string Username { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "DemoUser:Password is required.")]
         public string Password { get; set; } = string.Empty;

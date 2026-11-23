@@ -1,0 +1,14 @@
+@model int
+@{
+    var isNotFound = Model == StatusCodes.Status404NotFound;
+    ViewData["Title"] = isNotFound ? UiText.NotFoundTitle : UiText.ErrorTitle;
+}
+
+<section class="auth">
+    <div class="card auth-card">
+        <div class="error-code">@Model</div>
+        <h1>@(isNotFound ? UiText.NotFoundTitle : UiText.ErrorTitle)</h1>
+        <p class="muted">@(isNotFound ? UiText.NotFoundText : UiText.ErrorText)</p>
+        <a class="btn btn-primary btn-block" asp-controller="Orders" asp-action="Index">@UiText.BackToOrders</a>
+    </div>
+</section>

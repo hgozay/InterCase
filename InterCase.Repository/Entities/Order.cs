@@ -8,7 +8,11 @@ namespace InterCase.Repository.Entities
     [Index(nameof(UserId), nameof(CreatedAt))]
     public class Order : BaseEntity
     {
-        public required Guid UserId { get; set; }
+        public long UserId { get; set; }
+
+        [ForeignKey(nameof(UserId))]
+        [DeleteBehavior(DeleteBehavior.Restrict)]
+        public User User { get; set; } = null!;
 
         public required Guid ProductId { get; set; }
 

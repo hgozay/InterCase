@@ -2,6 +2,7 @@ namespace InterCase.Service.Interfaces
 {
     public interface IServiceManager
     {
+        IUserService User { get; }
         IOrderService Order { get; }
         ICacheService Cache { get; }
         IQueueService Queue { get; }

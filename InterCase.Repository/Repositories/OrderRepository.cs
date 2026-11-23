@@ -8,9 +8,12 @@ namespace InterCase.Repository.Repositories
 {
     public sealed class OrderRepository(AppDbContext context) : BaseRepository<Order>(context), IOrderRepository
     {
-        public Task<List<Order>> GetByUserIdAsync(Guid userId, CancellationToken ct = default) =>
+        protected override IQueryable<Order> Query(bool trackChanges) =>
+            base.Query(trackChanges).Include(o => o.User);
+
+        public Task<List<Order>> GetByUserIdAsync(Guid userPublicId, CancellationToken ct = default) =>
             Query(trackChanges: false)
-                .Where(o => o.UserId == userId)
+                .Where(o => o.User.PublicId == userPublicId)
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync(ct);
 

@@ -4,6 +4,8 @@ namespace InterCase.Repository.Interfaces
 {
     public interface IRepositoryManager
     {
+        IUserRepository User { get; }
+        IBaseRepository<UserLogin> UserLogin { get; }
         IOrderRepository Order { get; }
         IBaseRepository<Notification> Notification { get; }
 

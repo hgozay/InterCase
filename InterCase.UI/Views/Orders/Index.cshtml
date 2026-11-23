@@ -1,0 +1,85 @@
+@model OrdersPageViewModel
+@{
+    ViewData["Title"] = UiText.OrdersTitle;
+}
+
+<div class="layout">
+    <section class="card" aria-labelledby="new-order-title">
+        <header class="card-header">
+            <h1 id="new-order-title">@UiText.NewOrder</h1>
+            <p class="muted">@UiText.NewOrderHint</p>
+        </header>
+
+        @if (Model.FormError is not null)
+        {
+            <div class="alert alert-error" role="alert">
+                <strong>@Model.FormError</strong>
+                <div asp-validation-summary="ModelOnly"></div>
+                @if (!string.IsNullOrEmpty(Model.FormCorrelationId))
+                {
+                    <span class="alert-meta">@UiText.CorrelationId: <code>@Model.FormCorrelationId</code></span>
+                }
+            </div>
+        }
+
+        <form method="post" asp-controller="Orders" asp-action="Create" class="form" novalidate data-busy-text="@UiText.Sending">
+            <div class="field">
+                <label asp-for="Form.UserId" class="label">@UiText.UserId</label>
+                <input asp-for="Form.UserId" class="input mono" readonly aria-describedby="user-id-hint" />
+                <span id="user-id-hint" class="hint">@UiText.SignedInUserHint</span>
+                <span asp-validation-for="Form.UserId" class="field-error"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Form.ProductId" class="label">@UiText.ProductId</label>
+                <div class="input-group">
+                    <input asp-for="Form.ProductId" class="input mono" autocomplete="off" autocapitalize="none" spellcheck="false" />
+                    <button type="button" class="btn btn-secondary" data-new-guid="#Form_ProductId" aria-label="@UiText.GenerateIdLabel" title="@UiText.GenerateIdLabel">@UiText.GenerateId</button>
+                </div>
+                <span asp-validation-for="Form.ProductId" class="field-error"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="Form.Quantity" class="label">@UiText.Quantity</label>
+                <input asp-for="Form.Quantity" class="input input-narrow" min="1" max="1000" step="1" inputmode="numeric" aria-describedby="quantity-hint" />
+                <span id="quantity-hint" class="hint">@UiText.QuantityHint</span>
+                <span asp-validation-for="Form.Quantity" class="field-error"></span>
+            </div>
+
+            <fieldset class="field">
+                <legend class="label">@UiText.PaymentMethodLabel</legend>
+                <div class="segmented">
+                    @foreach (var method in Enum.GetValues<PaymentMethod>())
+                    {
+                        <label class="segment">
+                            <input type="radio" name="Form.PaymentMethod" value="@method" checked="@(Model.Form.PaymentMethod == method)" />
+                            <span>@UiText.Payment(method)</span>
+                        </label>
+                    }
+                </div>
+                <span asp-validation-for="Form.PaymentMethod" class="field-error"></span>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary btn-block">@UiText.PlaceOrder</button>
+        </form>
+    </section>
+
+    <section id="orders" class="card" aria-labelledby="orders-title">
+        <header class="card-header">
+            <h2 id="orders-title">@UiText.OrdersTitle</h2>
+        </header>
+
+        @if (Model.CreatedOrder is { } created)
+        {
+            <div class="alert alert-success" role="status">
+                <strong>@UiText.OrderAccepted</strong>
+                @if (!string.IsNullOrEmpty(created.CorrelationId))
+                {
+                    <span class="alert-meta">@UiText.CorrelationId: <code>@created.CorrelationId</code></span>
+                }
+            </div>
+        }
+
+        <partial name="_OrderList" model="Model.List" />
+    </section>
+</div>

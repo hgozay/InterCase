@@ -10,6 +10,8 @@ namespace InterCase.Repository
     public sealed class RepositoryManager : IRepositoryManager
     {
         private readonly AppDbContext _context;
+        private readonly Lazy<IUserRepository> _user;
+        private readonly Lazy<IBaseRepository<UserLogin>> _userLogin;
         private readonly Lazy<IOrderRepository> _order;
         private readonly Lazy<IBaseRepository<Notification>> _notification;
         private IDbContextTransaction? _transaction;
@@ -17,10 +19,14 @@ namespace InterCase.Repository
         public RepositoryManager(AppDbContext context)
         {
             _context = context;
+            _user = new Lazy<IUserRepository>(() => new UserRepository(context));
+            _userLogin = new Lazy<IBaseRepository<UserLogin>>(() => new UserLoginRepository(context));
             _order = new Lazy<IOrderRepository>(() => new OrderRepository(context));
             _notification = new Lazy<IBaseRepository<Notification>>(() => new NotificationRepository(context));
         }
 
+        public IUserRepository User => _user.Value;
+        public IBaseRepository<UserLogin> UserLogin => _userLogin.Value;
         public IOrderRepository Order => _order.Value;
         public IBaseRepository<Notification> Notification => _notification.Value;
 

@@ -1,0 +1,68 @@
+@using Microsoft.Extensions.Options
+@inject IOptions<ApiOptions> ApiOptions
+@{
+    var apiBaseUrl = ApiOptions.Value.BaseUrl.TrimEnd('/');
+    var returnUrl = HttpMethods.IsGet(Context.Request.Method)
+        ? $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}"
+        : $"{Context.Request.PathBase}{Context.Request.Path}";
+    var currentLanguage = Localization.CurrentLanguage;
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+}
+<!DOCTYPE html>
+<html lang="@currentLanguage">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>@ViewData["Title"] · InterCase</title>
+    <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a class="brand" href="~/">
+                <span class="brand-mark" aria-hidden="true">IC</span>
+                <span class="brand-text">
+                    <strong>InterCase</strong>
+                    <small>@UiText.AppTagline</small>
+                </span>
+            </a>
+
+            <div class="topbar-actions">
+                <form method="post" asp-controller="Language" asp-action="Set" class="lang-switch" role="group" aria-label="@UiText.Language">
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+                    @foreach (var language in Localization.SupportedLanguages.OrderByDescending(l => l == Localization.Turkish))
+                    {
+                        var isCurrent = language == currentLanguage;
+                        <button type="submit" name="language" value="@language" class="@(isCurrent ? "is-active" : null)" aria-pressed="@(isCurrent ? "true" : "false")">@language.ToUpperInvariant()</button>
+                    }
+                </form>
+
+                @if (isAuthenticated)
+                {
+                    <span class="user-chip" title="@User.Identity!.Name">
+                        <span class="user-avatar" aria-hidden="true">@(User.Identity!.Name?.FirstOrDefault().ToString().ToUpperInvariant())</span>
+                        <span class="user-name">@User.Identity!.Name</span>
+                    </span>
+                    <form method="post" asp-controller="Account" asp-action="Logout">
+                        <button type="submit" class="btn btn-ghost btn-sm">@UiText.SignOut</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </header>
+
+    <main class="container main">
+        @RenderBody()
+    </main>
+
+    <footer class="container footer">
+        <span>@UiText.ApiLinks</span>
+        <a href="@apiBaseUrl/swagger" target="_blank" rel="noopener">Swagger</a>
+        <a href="@apiBaseUrl/hangfire" target="_blank" rel="noopener">Hangfire</a>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</body>
+</html>

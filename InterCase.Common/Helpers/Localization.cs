@@ -16,6 +16,7 @@ namespace InterCase.Common.Helpers
             public const string UserIdEmpty = "UserIdEmpty";
             public const string ProductIdRequired = "ProductIdRequired";
             public const string ProductIdEmpty = "ProductIdEmpty";
+            public const string OrderIdEmpty = "OrderIdEmpty";
             public const string QuantityRequired = "QuantityRequired";
             public const string QuantityRange = "QuantityRange";
             public const string PaymentMethodRequired = "PaymentMethodRequired";
@@ -31,8 +32,11 @@ namespace InterCase.Common.Helpers
             public const string Unauthorized = "Unauthorized";
             public const string Forbidden = "Forbidden";
             public const string ResourceNotFound = "ResourceNotFound";
+            public const string Conflict = "Conflict";
             public const string UnexpectedError = "UnexpectedError";
             public const string InvalidCredentials = "InvalidCredentials";
+            public const string OrderProcessedNotification = "OrderProcessedNotification";
+            public const string OrderNotPending = "OrderNotPending";
         }
 
         private static readonly Dictionary<string, Dictionary<string, string>> Messages = new()
@@ -41,6 +45,7 @@ namespace InterCase.Common.Helpers
             [Keys.UserIdEmpty] = new() { [English] = "userId cannot be an empty GUID.", [Turkish] = "userId boş GUID olamaz." },
             [Keys.ProductIdRequired] = new() { [English] = "productId is required.", [Turkish] = "productId zorunludur." },
             [Keys.ProductIdEmpty] = new() { [English] = "productId cannot be an empty GUID.", [Turkish] = "productId boş GUID olamaz." },
+            [Keys.OrderIdEmpty] = new() { [English] = "id cannot be an empty GUID.", [Turkish] = "id boş GUID olamaz." },
             [Keys.QuantityRequired] = new() { [English] = "quantity is required.", [Turkish] = "quantity zorunludur." },
             [Keys.QuantityRange] = new() { [English] = "quantity must be between 1 and 1000.", [Turkish] = "quantity 1 ile 1000 arasında olmalıdır." },
             [Keys.PaymentMethodRequired] = new() { [English] = "paymentMethod is required.", [Turkish] = "paymentMethod zorunludur." },
@@ -56,8 +61,11 @@ namespace InterCase.Common.Helpers
             [Keys.Unauthorized] = new() { [English] = "Authentication is required.", [Turkish] = "Bu işlem için kimlik doğrulaması gerekiyor." },
             [Keys.Forbidden] = new() { [English] = "You do not have permission to perform this action.", [Turkish] = "Bu işlemi yapma yetkiniz yok." },
             [Keys.ResourceNotFound] = new() { [English] = "The requested resource was not found.", [Turkish] = "İstenen kayıt bulunamadı." },
+            [Keys.Conflict] = new() { [English] = "The request conflicts with the current state of the resource.", [Turkish] = "İstek, kaydın mevcut durumuyla çelişiyor." },
             [Keys.UnexpectedError] = new() { [English] = "An unexpected error occurred.", [Turkish] = "Beklenmeyen bir hata oluştu." },
-            [Keys.InvalidCredentials] = new() { [English] = "Username or password is incorrect.", [Turkish] = "Kullanıcı adı ya da şifre hatalı." }
+            [Keys.InvalidCredentials] = new() { [English] = "Username or password is incorrect.", [Turkish] = "Kullanıcı adı ya da şifre hatalı." },
+            [Keys.OrderProcessedNotification] = new() { [English] = "Your order {0} has been processed.", [Turkish] = "{0} numaralı siparişiniz işlendi." },
+            [Keys.OrderNotPending] = new() { [English] = "Only pending orders can be updated or deleted.", [Turkish] = "Yalnızca bekleyen (Pending) siparişler güncellenebilir ya da silinebilir." }
         };
 
         public static string CurrentLanguage => Normalize(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);

@@ -1,9 +1,9 @@
-using System.Security.Cryptography;
-using System.Text;
 using InterCase.API.Helpers;
 using InterCase.Common;
 using InterCase.Common.Dtos.Auth;
+using InterCase.Common.Dtos.Users;
 using InterCase.Common.Helpers;
+using InterCase.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -14,37 +14,35 @@ namespace InterCase.API.Controllers
     [AllowAnonymous]
     [Route("auth")]
     public sealed class AuthController(
+        IServiceManager serviceManager,
         IOptions<JwtOptions> jwtOptions,
-        IOptions<DemoUserOptions> demoUserOptions,
         TimeProvider timeProvider,
-        ILogger<AuthController> logger) : ControllerBase
+        IWebHostEnvironment environment) : ControllerBase
     {
         [HttpPost("token")]
-        [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
-        [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
-        public ActionResult<TokenResponse> Token(TokenRequest request)
+        public async Task<ActionResult<TokenResponse>> Token(TokenRequest request, CancellationToken ct)
         {
-            var demoUser = demoUserOptions.Value;
-            var isValid = FixedTimeEquals(request.Username, demoUser.Username)
-                & FixedTimeEquals(request.Password, demoUser.Password);
-
-            if (!isValid)
+            var user = await serviceManager.User.AuthenticateAsync(request.Username, request.Password, ct);
+            if (user is null)
             {
-                logger.LogWarning("Token request rejected for {Username}", request.Username);
                 return Problem(
                     statusCode: StatusCodes.Status401Unauthorized,
                     detail: Localization.Get(Localization.Keys.InvalidCredentials));
             }
 
-            var token = JwtTokenHelper.CreateToken(jwtOptions.Value, demoUser.Username, timeProvider.GetUtcNow().UtcDateTime);
-            logger.LogInformation("Token issued for {Username}, expires at {ExpiresAt}", demoUser.Username, token.ExpiresAt);
-            return token;
+            var token = JwtTokenHelper.CreateToken(jwtOptions.Value, user.Id, user.Username, timeProvider.GetUtcNow().UtcDateTime);
+            await serviceManager.User.RecordLoginAsync(user.Id, token.TokenId, token.AccessToken, token.ExpiresAt, ct);
+
+            return new TokenResponse(token.AccessToken, token.ExpiresAt, user.Id, user.Username, user.DisplayName);
         }
 
-        private static bool FixedTimeEquals(string left, string right) =>
-            CryptographicOperations.FixedTimeEquals(
-                SHA256.HashData(Encoding.UTF8.GetBytes(left)),
-                SHA256.HashData(Encoding.UTF8.GetBytes(right)));
+        [HttpGet("demo-users")]
+        public async Task<ActionResult<IReadOnlyList<UserResponse>>> DemoUsers(CancellationToken ct)
+        {
+            if (!environment.IsDevelopment())
+                return NotFound();
+
+            return Ok(await serviceManager.User.GetDemoUsersAsync(ct));
+        }
     }
 }

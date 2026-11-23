@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Hangfire;
+using Hangfire.PostgreSql;
 using InterCase.API.Handlers;
 using InterCase.API.Helpers;
 using InterCase.API.Middlewares;
@@ -47,10 +49,6 @@ try
         .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
         .ValidateDataAnnotations()
         .ValidateOnStart();
-    builder.Services.AddOptions<DemoUserOptions>()
-        .Bind(builder.Configuration.GetSection(DemoUserOptions.SectionName))
-        .ValidateDataAnnotations()
-        .ValidateOnStart();
     builder.Services.AddOptions<CacheOptions>()
         .Bind(builder.Configuration.GetSection(CacheOptions.SectionName))
         .ValidateDataAnnotations()
@@ -61,6 +59,10 @@ try
         .ValidateOnStart();
     builder.Services.AddOptions<RabbitMqOptions>()
         .Bind(builder.Configuration.GetSection(RabbitMqOptions.SectionName))
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+    builder.Services.AddOptions<ProcessingOptions>()
+        .Bind(builder.Configuration.GetSection(ProcessingOptions.SectionName))
         .ValidateDataAnnotations()
         .ValidateOnStart();
 
@@ -78,6 +80,18 @@ try
     builder.Services.AddSingleton<IQueueService, QueueService>();
     builder.Services.AddScoped<ICorrelationContext, CorrelationContext>();
     builder.Services.AddScoped<IServiceManager, ServiceManager>();
+
+    builder.Services.AddHangfire(configuration => configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UsePostgreSqlStorage(
+            options => options.UseNpgsqlConnection(postgresConnection),
+            new PostgreSqlStorageOptions
+            {
+                SchemaName = "hangfire",
+                QueuePollInterval = TimeSpan.FromSeconds(1)
+            }));
 
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
     builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
@@ -153,6 +167,7 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
+    app.MapHangfireDashboard("/hangfire");
 
     if (app.Environment.IsDevelopment())
     {

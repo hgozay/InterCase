@@ -19,6 +19,7 @@ namespace InterCase.API.Helpers
                     StatusCodes.Status401Unauthorized => Localization.Keys.Unauthorized,
                     StatusCodes.Status403Forbidden => Localization.Keys.Forbidden,
                     StatusCodes.Status404NotFound => Localization.Keys.ResourceNotFound,
+                    StatusCodes.Status409Conflict => Localization.Keys.Conflict,
                     StatusCodes.Status500InternalServerError => Localization.Keys.UnexpectedError,
                     _ => null
                 };

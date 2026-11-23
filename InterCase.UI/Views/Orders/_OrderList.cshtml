@@ -1,0 +1,78 @@
+@model OrderListViewModel
+
+<div class="order-list"
+     data-order-list
+     data-url="@Url.Action("List", "Orders", new { highlight = Model.HighlightedOrderId })"
+     data-active="@(Model.HasActiveOrders ? "true" : "false")"
+     aria-live="polite">
+    @if (Model.Error is not null)
+    {
+        <div class="alert alert-error" role="alert">
+            <strong>@Model.Error</strong>
+            @if (!string.IsNullOrEmpty(Model.CorrelationId))
+            {
+                <span class="alert-meta">@UiText.CorrelationId: <code>@Model.CorrelationId</code></span>
+            }
+        </div>
+    }
+    else if (!Model.HasUser)
+    {
+        <p class="empty">@UiText.EnterUserId</p>
+    }
+    else if (Model.Orders.Count == 0)
+    {
+        <p class="empty">@UiText.NoOrders</p>
+    }
+    else
+    {
+        <div class="list-meta">
+            <span class="count">@UiText.OrderCount(Model.Orders.Count)</span>
+            @if (Model.HasActiveOrders)
+            {
+                <span class="live"><span class="live-dot" aria-hidden="true"></span>@UiText.LiveUpdating</span>
+            }
+            <a class="link" asp-controller="Orders" asp-action="Index">@UiText.Refresh</a>
+        </div>
+
+        <div class="table-wrap">
+            <table class="orders">
+                <thead>
+                    <tr>
+                        <th scope="col">@UiText.OrderColumn</th>
+                        <th scope="col">@UiText.ProductColumn</th>
+                        <th scope="col" class="num">@UiText.Quantity</th>
+                        <th scope="col">@UiText.PaymentColumn</th>
+                        <th scope="col">@UiText.StatusColumn</th>
+                        <th scope="col">@UiText.CreatedColumn</th>
+                        <th scope="col">@UiText.ProcessedColumn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        var isNew = order.Id == Model.HighlightedOrderId;
+                        <tr class="@(isNew ? "is-new" : null)">
+                            <td class="cell-id" data-label="@UiText.OrderColumn">
+                                <code title="@order.Id">…@DisplayFormat.ShortId(order.Id)</code>
+                                @if (isNew)
+                                {
+                                    <span class="tag">@UiText.NewBadge</span>
+                                }
+                            </td>
+                            <td data-label="@UiText.ProductColumn"><code title="@order.ProductId">…@DisplayFormat.ShortId(order.ProductId)</code></td>
+                            <td class="num" data-label="@UiText.Quantity">@order.Quantity</td>
+                            <td data-label="@UiText.PaymentColumn">@UiText.Payment(order.PaymentMethod)</td>
+                            <td class="cell-status" data-label="@UiText.StatusColumn">
+                                <span class="status @DisplayFormat.StatusClass(order.Status)">@UiText.Status(order.Status)</span>
+                            </td>
+                            <td data-label="@UiText.CreatedColumn"><partial name="_Time" model="order.CreatedAt" /></td>
+                            <td data-label="@UiText.ProcessedColumn"><partial name="_Time" model="order.ProcessedAt" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <p class="footnote">@UiText.TimeZoneNote</p>
+    }
+</div>

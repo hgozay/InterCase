@@ -28,4 +28,11 @@ namespace InterCase.Common
     {
         RabbitMq = 1
     }
+
+    public enum QueueHandleResult
+    {
+        Ack = 1,
+        Retry = 2,
+        Reject = 3
+    }
 }

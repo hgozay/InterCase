@@ -13,6 +13,7 @@ Content-Type: application/json
 
 ###
 
+# @name createOrder
 POST {{InterCase.API_HostAddress}}/orders
 Authorization: Bearer {{token.response.body.$.accessToken}}
 Content-Type: application/json
@@ -29,6 +30,30 @@ Accept-Language: tr
 
 GET {{InterCase.API_HostAddress}}/orders/{{userId}}
 Authorization: Bearer {{token.response.body.$.accessToken}}
+
+###
+
+GET {{InterCase.API_HostAddress}}/orders/by-id/{{createOrder.response.body.$.id}}
+Authorization: Bearer {{token.response.body.$.accessToken}}
+
+###
+
+PUT {{InterCase.API_HostAddress}}/orders/{{createOrder.response.body.$.id}}
+Authorization: Bearer {{token.response.body.$.accessToken}}
+Content-Type: application/json
+Accept-Language: tr
+
+{
+  "productId": "{{productId}}",
+  "quantity": 5,
+  "paymentMethod": "BankTransfer"
+}
+
+###
+
+DELETE {{InterCase.API_HostAddress}}/orders/{{createOrder.response.body.$.id}}
+Authorization: Bearer {{token.response.body.$.accessToken}}
+Accept-Language: tr
 
 ###
 

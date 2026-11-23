@@ -11,7 +11,7 @@ namespace InterCase.Repository.Repositories
     {
         protected AppDbContext Context { get; } = context;
 
-        protected IQueryable<TEntity> Query(bool trackChanges)
+        protected virtual IQueryable<TEntity> Query(bool trackChanges)
         {
             var query = Context.Set<TEntity>().Where(e => !e.IsDeleted);
             return trackChanges ? query : query.AsNoTracking();

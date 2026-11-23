@@ -7,10 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace InterCase.Service.Services.DbServices
 {
-    public abstract class BaseService<TEntity, TResponse, TRequest>(
+    public abstract class BaseService<TEntity, TResponse, TCreateRequest, TUpdateRequest>(
         IRepositoryManager repositoryManager,
         IMapper mapper,
-        ILogger logger) : IBaseService<TResponse, TRequest>
+        ILogger logger) : IBaseService<TResponse, TCreateRequest, TUpdateRequest>
         where TEntity : BaseEntity
     {
         protected IRepositoryManager RepositoryManager { get; } = repositoryManager;
@@ -20,9 +20,18 @@ namespace InterCase.Service.Services.DbServices
         protected abstract IBaseRepository<TEntity> Repository { get; }
 
         protected virtual TResponse ToResponse(TEntity entity) => Mapper.Map<TResponse>(entity);
-        protected virtual TEntity ToEntity(TRequest request) => Mapper.Map<TEntity>(request);
-        protected virtual void Apply(TRequest request, TEntity entity) => Mapper.Map(request, entity);
+        protected virtual TEntity ToEntity(TCreateRequest request) => Mapper.Map<TEntity>(request);
+        protected virtual void Apply(TUpdateRequest request, TEntity entity) => Mapper.Map(request, entity);
 
+        protected virtual void EnsureCanUpdate(TEntity entity)
+        {
+        }
+
+        protected virtual void EnsureCanDelete(TEntity entity)
+        {
+        }
+
+        protected virtual Task OnCreatingAsync(TEntity entity, TCreateRequest request, CancellationToken ct) => Task.CompletedTask;
         protected virtual Task OnCreatedAsync(TEntity entity, CancellationToken ct) => Task.CompletedTask;
         protected virtual Task OnUpdatedAsync(TEntity entity, CancellationToken ct) => Task.CompletedTask;
         protected virtual Task OnDeletedAsync(TEntity entity, CancellationToken ct) => Task.CompletedTask;
@@ -45,9 +54,10 @@ namespace InterCase.Service.Services.DbServices
             return entities.Select(ToResponse).ToList();
         }
 
-        public virtual async Task<TResponse> CreateAsync(TRequest request, CancellationToken ct = default)
+        public virtual async Task<TResponse> CreateAsync(TCreateRequest request, CancellationToken ct = default)
         {
             var entity = ToEntity(request);
+            await OnCreatingAsync(entity, request, ct);
             await Repository.AddAsync(entity, ct);
             await RepositoryManager.SaveChangesAsync(ct);
 
@@ -55,9 +65,10 @@ namespace InterCase.Service.Services.DbServices
             return ToResponse(entity);
         }
 
-        public virtual async Task<TResponse> UpdateAsync(Guid publicId, TRequest request, CancellationToken ct = default)
+        public virtual async Task<TResponse> UpdateAsync(Guid publicId, TUpdateRequest request, CancellationToken ct = default)
         {
             var entity = await GetTrackedOrThrowAsync(publicId, ct);
+            EnsureCanUpdate(entity);
             Apply(request, entity);
             await RepositoryManager.SaveChangesAsync(ct);
 
@@ -68,6 +79,7 @@ namespace InterCase.Service.Services.DbServices
         public virtual async Task DeleteAsync(Guid publicId, CancellationToken ct = default)
         {
             var entity = await GetTrackedOrThrowAsync(publicId, ct);
+            EnsureCanDelete(entity);
             Repository.Delete(entity);
             await RepositoryManager.SaveChangesAsync(ct);
 

@@ -7,5 +7,10 @@ namespace InterCase.Service.Interfaces
             TMessage message,
             string? correlationId = null,
             CancellationToken ct = default);
+
+        Task SubscribeAsync<TMessage>(
+            string queueName,
+            Func<TMessage, string?, CancellationToken, Task> handler,
+            CancellationToken ct);
     }
 }
