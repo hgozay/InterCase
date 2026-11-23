@@ -20,14 +20,28 @@ namespace InterCase.Service.Helpers
         public static bool Verify(string password, string passwordHash)
         {
             var parts = passwordHash.Split('$');
-            if (parts.Length != 4 || parts[0] != Algorithm || !int.TryParse(parts[1], out var iterations))
+            if (parts.Length != 4 || parts[0] != Algorithm || !int.TryParse(parts[1], out var iterations) || iterations <= 0)
                 return false;
 
-            var salt = Convert.FromBase64String(parts[2]);
-            var expected = Convert.FromBase64String(parts[3]);
+            if (!TryDecode(parts[2], out var salt) || !TryDecode(parts[3], out var expected))
+                return false;
+
             var actual = Derive(password, salt, iterations);
 
             return CryptographicOperations.FixedTimeEquals(actual, expected);
+        }
+
+        private static bool TryDecode(string value, out byte[] bytes)
+        {
+            var buffer = new byte[value.Length * 3 / 4];
+            if (Convert.TryFromBase64String(value, buffer, out var written))
+            {
+                bytes = buffer[..written];
+                return true;
+            }
+
+            bytes = [];
+            return false;
         }
 
         private static byte[] Derive(string password, byte[] salt, int iterations) =>
