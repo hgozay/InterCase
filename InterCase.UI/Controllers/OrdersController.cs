@@ -1,21 +1,19 @@
 using System.Text.Json;
 using InterCase.Common;
-using InterCase.UI.Clients;
+using InterCase.Common.Dtos.Paging;
 using InterCase.UI.Helpers;
 using InterCase.UI.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InterCase.UI.Controllers
 {
-    [Authorize]
-    public sealed class OrdersController(ApiClient apiClient) : Controller
+    public sealed class OrdersController : BaseController
     {
         [HttpGet("")]
         [HttpGet("orders")]
-        public async Task<IActionResult> Index(CancellationToken ct)
+        public async Task<IActionResult> Index(int ordersPage = 1, CancellationToken ct = default)
         {
             if (User.GetUserId() is not { } userId)
                 return await ExpireSessionAsync();
@@ -24,7 +22,7 @@ namespace InterCase.UI.Controllers
                 ? JsonSerializer.Deserialize<CreatedOrderNotice>(json)
                 : null;
 
-            var list = await LoadListAsync(userId, createdOrder?.OrderId, ct);
+            var list = await LoadListAsync(userId, createdOrder, ordersPage, ct);
             if (list is null)
                 return await ExpireSessionAsync();
 
@@ -37,8 +35,7 @@ namespace InterCase.UI.Controllers
                     Quantity = 1,
                     PaymentMethod = PaymentMethod.CreditCard
                 },
-                List = list,
-                CreatedOrder = createdOrder
+                List = list
             });
         }
 
@@ -49,7 +46,7 @@ namespace InterCase.UI.Controllers
                 return await ExpireSessionAsync();
 
             form.UserId = userId.ToString();
-            var result = await apiClient.CreateOrderAsync(form, ct);
+            var result = await ApiClient.CreateOrderAsync(form, ct);
             if (result.IsUnauthorized)
                 return await ExpireSessionAsync();
 
@@ -59,8 +56,7 @@ namespace InterCase.UI.Controllers
                 return RedirectToAction(nameof(Index), null, null, "orders");
             }
 
-            ModelState.Clear();
-            ModelState.AddApiErrors(
+            ShowApiErrors(
                 result.Problem,
                 nameof(OrdersPageViewModel.Form),
                 nameof(OrderFormModel.UserId),
@@ -68,7 +64,7 @@ namespace InterCase.UI.Controllers
                 nameof(OrderFormModel.Quantity),
                 nameof(OrderFormModel.PaymentMethod));
 
-            var list = await LoadListAsync(userId, null, ct);
+            var list = await LoadListAsync(userId, null, 1, ct);
             if (list is null)
                 return await ExpireSessionAsync();
 
@@ -76,17 +72,16 @@ namespace InterCase.UI.Controllers
             {
                 Form = form,
                 List = list,
-                FormError = result.IsUnavailable
-                    ? UiText.ApiUnavailable
-                    : result.Problem?.Title ?? result.Problem?.Detail ?? UiText.UnexpectedApiResponse,
+                FormError = DescribeFailure(result),
                 FormCorrelationId = result.CorrelationId
             });
         }
 
         [HttpGet("orders/list")]
-        public async Task<IActionResult> List(Guid? highlight, CancellationToken ct)
+        public async Task<IActionResult> List(Guid? highlight, string? correlationId, int ordersPage = 1, CancellationToken ct = default)
         {
-            var list = User.GetUserId() is { } userId ? await LoadListAsync(userId, highlight, ct) : null;
+            var createdOrder = highlight is { } orderId ? new CreatedOrderNotice(orderId, correlationId) : null;
+            var list = User.GetUserId() is { } userId ? await LoadListAsync(userId, createdOrder, ordersPage, ct) : null;
             if (list is null)
             {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -96,9 +91,9 @@ namespace InterCase.UI.Controllers
             return PartialView("_OrderList", list);
         }
 
-        private async Task<OrderListViewModel?> LoadListAsync(Guid userId, Guid? highlightedOrderId, CancellationToken ct)
+        private async Task<OrderListViewModel?> LoadListAsync(Guid userId, CreatedOrderNotice? createdOrder, int page, CancellationToken ct)
         {
-            var result = await apiClient.GetOrdersAsync(userId, ct);
+            var result = await ApiClient.GetOrdersAsync(userId, ct);
             if (result.IsUnauthorized)
                 return null;
 
@@ -112,27 +107,19 @@ namespace InterCase.UI.Controllers
                 };
             }
 
+            var orders = result.Value!.OrderByDescending(o => o.CreatedAt).ToList();
+            var totalPages = Math.Max(1, (int)Math.Ceiling(orders.Count / (double)PageRequest.DefaultPageSize));
+            var currentPage = Math.Clamp(page, 1, totalPages);
+
             return new OrderListViewModel
             {
                 UserId = userId.ToString(),
-                Orders = result.Value!.OrderByDescending(o => o.CreatedAt).ToList(),
-                HighlightedOrderId = highlightedOrderId
+                Orders = orders.Skip((currentPage - 1) * PageRequest.DefaultPageSize).Take(PageRequest.DefaultPageSize).ToList(),
+                Page = currentPage,
+                TotalPages = totalPages,
+                TotalCount = orders.Count,
+                CreatedOrder = createdOrder
             };
-        }
-
-        private async Task<IActionResult> ExpireSessionAsync()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction(nameof(AccountController.Login), "Account", new { expired = true });
-        }
-
-        private static string DescribeError<T>(ApiResult<T> result)
-        {
-            if (result.IsUnavailable)
-                return UiText.ApiUnavailable;
-
-            var fieldMessage = result.Problem?.Errors?.Values.SelectMany(m => m).FirstOrDefault();
-            return fieldMessage ?? result.Problem?.Detail ?? result.Problem?.Title ?? UiText.UnexpectedApiResponse;
         }
     }
 }

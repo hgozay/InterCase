@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using InterCase.Common;
 using InterCase.Common.Dtos.Auth;
-using InterCase.UI.Clients;
 using InterCase.UI.Helpers;
 using InterCase.UI.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -13,9 +12,8 @@ using Microsoft.Extensions.Options;
 namespace InterCase.UI.Controllers
 {
     public sealed class AccountController(
-        ApiClient apiClient,
         IOptions<DemoUserOptions> demoUserOptions,
-        IWebHostEnvironment environment) : Controller
+        IWebHostEnvironment environment) : BaseController
     {
         [AllowAnonymous]
         [HttpGet("login")]
@@ -39,7 +37,7 @@ namespace InterCase.UI.Controllers
                 Username = model.Username?.Trim() ?? string.Empty,
                 Password = model.Password ?? string.Empty
             };
-            var result = await apiClient.CreateTokenAsync(request, ct);
+            var result = await ApiClient.CreateTokenAsync(request, ct);
 
             if (result.IsSuccess)
             {
@@ -66,11 +64,8 @@ namespace InterCase.UI.Controllers
                 return RedirectToLocal(model.ReturnUrl);
             }
 
-            ModelState.Clear();
-            ModelState.AddApiErrors(result.Problem, string.Empty, nameof(LoginViewModel.Username), nameof(LoginViewModel.Password));
-            ViewData["Error"] = result.IsUnavailable
-                ? UiText.ApiUnavailable
-                : result.Problem?.Detail ?? result.Problem?.Title ?? UiText.UnexpectedApiResponse;
+            ShowApiErrors(result.Problem, string.Empty, nameof(LoginViewModel.Username), nameof(LoginViewModel.Password));
+            ViewData["Error"] = DescribeFailure(result);
 
             return await LoginViewAsync(model, ct);
         }
@@ -87,15 +82,12 @@ namespace InterCase.UI.Controllers
             var demoPassword = demoUserOptions.Value.Password;
             if (environment.IsDevelopment() && !string.IsNullOrEmpty(demoPassword))
             {
-                var demoUsers = await apiClient.GetDemoUsersAsync(ct);
+                var demoUsers = await ApiClient.GetDemoUsersAsync(ct);
                 if (demoUsers.IsSuccess && demoUsers.Value!.Count > 0)
                     ViewData["DemoLogin"] = new DemoLoginViewModel(demoUsers.Value!, demoPassword);
             }
 
             return View(nameof(Login), model);
         }
-
-        private IActionResult RedirectToLocal(string? returnUrl) =>
-            Url.IsLocalUrl(returnUrl) ? LocalRedirect(returnUrl) : RedirectToAction(nameof(OrdersController.Index), "Orders");
     }
 }

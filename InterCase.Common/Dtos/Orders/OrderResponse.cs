@@ -8,5 +8,8 @@ namespace InterCase.Common.Dtos.Orders
         PaymentMethod PaymentMethod,
         OrderStatus Status,
         DateTime CreatedAt,
-        DateTime? ProcessedAt);
+        DateTime? ProcessedAt,
+        OrderNotificationResponse? Notification);
+
+    public sealed record OrderNotificationResponse(string Channel, string Message, DateTime SentAt);
 }

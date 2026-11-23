@@ -12,7 +12,11 @@ namespace InterCase.UI.Helpers
         public static string AppTagline => Pick("Order console", "Sipariş konsolu");
         public static string Language => Pick("Language", "Dil");
         public static string SignOut => Pick("Sign out", "Çıkış");
-        public static string ApiLinks => Pick("API tools", "API araçları");
+        public static string DevTools => Pick("Developer tools", "Geliştirici araçları");
+        public static string OpeningRabbitMq => Pick("Opening the RabbitMQ management panel…", "RabbitMQ yönetim paneli açılıyor…");
+        public static string OpenRabbitMq => Pick("Open RabbitMQ panel", "RabbitMQ panelini aç");
+        public static string MainNavigation => Pick("Main navigation", "Ana gezinme");
+        public static string ActivityTitle => Pick("Notifications & logs", "Bildirimler ve loglar");
 
         public static string LoginTitle => Pick("Sign in", "Giriş yap");
         public static string LoginSubtitle => Pick(
@@ -50,6 +54,15 @@ namespace InterCase.UI.Helpers
         public static string OrderAccepted => Pick(
             "Order received. Its status will change once the worker processes it.",
             "Sipariş alındı. Worker işleyince durumu değişecek.");
+        public static string OrderInProgress => Pick(
+            "The worker is processing your order.",
+            "Siparişiniz worker tarafından işleniyor.");
+        public static string OrderCompleted => Pick(
+            "Your order has been processed.",
+            "Siparişiniz işlendi.");
+        public static string OrderFailed => Pick(
+            "Your order could not be processed.",
+            "Siparişiniz işlenemedi.");
         public static string CorrelationId => "Correlation ID";
 
         public static string OrdersTitle => Pick("Orders", "Siparişler");
@@ -66,6 +79,32 @@ namespace InterCase.UI.Helpers
         public static string CreatedColumn => Pick("Created", "Oluşturuldu");
         public static string ProcessedColumn => Pick("Processed", "İşlendi");
         public static string NewBadge => Pick("New", "Yeni");
+        public static string NotificationColumn => Pick("Notification", "Bildirim");
+        public static string OrdersPagination => Pick("Order pages", "Sipariş sayfaları");
+
+        public static string NotificationsTitle => Pick("Notifications", "Bildirimler");
+        public static string NotificationsHint => Pick(
+            "Sent to you when the worker finishes processing an order.",
+            "Worker bir siparişi işlemeyi bitirdiğinde size gönderilir.");
+        public static string NoNotifications => Pick("No notifications yet.", "Henüz bildirim yok.");
+        public static string NotificationsPagination => Pick("Notification pages", "Bildirim sayfaları");
+        public static string SentColumn => Pick("Sent", "Gönderildi");
+        public static string ChannelColumn => Pick("Channel", "Kanal");
+        public static string MessageColumn => Pick("Message", "Mesaj");
+
+        public static string LogsTitle => Pick("Redis logs", "Redis logları");
+        public static string LogsHint => Pick(
+            "The record the worker writes to Redis for each processed order.",
+            "Worker'ın işlenen her sipariş için Redis'e yazdığı kayıt.");
+        public static string NoLogs => Pick("No processed orders yet.", "Henüz işlenmiş sipariş yok.");
+        public static string LogsPagination => Pick("Log pages", "Log sayfaları");
+        public static string LogColumn => Pick("Redis record", "Redis kaydı");
+        public static string LogMissing => Pick("No record in Redis", "Redis'te kayıt yok");
+
+        public static string PreviousPage => Pick("Previous", "Önceki");
+        public static string NextPage => Pick("Next", "Sonraki");
+        public static string PageLabel(int page) => Pick($"Page {page}", $"Sayfa {page}");
+        public static string PageOf(int page, int totalPages) => $"{page} / {totalPages}";
         public static string TimeZoneNote => Pick("Times are in Turkey time (UTC+3).", "Saatler Türkiye saatiyle (UTC+3).");
 
         public static string ApiUnavailable => Pick(
@@ -88,6 +127,20 @@ namespace InterCase.UI.Helpers
         public static string OrderCount(int count) => Pick(
             count == 1 ? "1 order" : $"{count} orders",
             $"{count} sipariş");
+
+        public static string NotificationCount(int count) => Pick(
+            count == 1 ? "1 notification" : $"{count} notifications",
+            $"{count} bildirim");
+
+        public static string LogCount(int count) => Pick(
+            count == 1 ? "1 record" : $"{count} records",
+            $"{count} kayıt");
+
+        public static string Channel(string channel) => channel switch
+        {
+            NotificationChannels.Console => Pick("Console", "Konsol"),
+            _ => channel
+        };
 
         public static string Status(OrderStatus status) => status switch
         {

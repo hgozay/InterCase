@@ -1,0 +1,137 @@
+@model ActivityPageViewModel
+@{
+    ViewData["Title"] = UiText.ActivityTitle;
+    var notifications = Model.Notifications;
+    var logs = Model.Logs;
+}
+
+<div class="stack">
+    <section id="notifications" class="card" aria-labelledby="notifications-title">
+        <header class="card-header">
+            <h1 id="notifications-title">@UiText.NotificationsTitle</h1>
+            <p class="muted">@UiText.NotificationsHint</p>
+        </header>
+
+        <div class="data-list">
+            @if (notifications.Error is not null)
+            {
+                <div class="alert alert-error" role="alert">
+                    <strong>@notifications.Error</strong>
+                    @if (!string.IsNullOrEmpty(notifications.CorrelationId))
+                    {
+                        <span class="alert-meta">@UiText.CorrelationId: <code>@notifications.CorrelationId</code></span>
+                    }
+                </div>
+            }
+            else if (notifications.TotalCount == 0)
+            {
+                <p class="empty">@UiText.NoNotifications</p>
+            }
+            else
+            {
+                <div class="list-meta">
+                    <span class="count">@UiText.NotificationCount(notifications.TotalCount)</span>
+                    <a class="link" href="@Url.Action("Index", "Activity", new { notificationsPage = notifications.Page, logsPage = logs.Page }, null, null, "notifications")">@UiText.Refresh</a>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">@UiText.SentColumn</th>
+                                <th scope="col">@UiText.OrderColumn</th>
+                                <th scope="col">@UiText.ChannelColumn</th>
+                                <th scope="col">@UiText.MessageColumn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var notification in notifications.Items)
+                            {
+                                <tr>
+                                    <td class="cell-status" data-label="@UiText.SentColumn"><partial name="_Time" model="notification.SentAt" /></td>
+                                    <td class="cell-id cell-wide" data-label="@UiText.OrderColumn"><code>@notification.OrderId</code></td>
+                                    <td data-label="@UiText.ChannelColumn"><span class="channel">@UiText.Channel(notification.Channel)</span></td>
+                                    <td class="cell-text cell-wide" data-label="@UiText.MessageColumn">@notification.Message</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <partial name="_Pager" model="@(new PagerViewModel(notifications.Page, notifications.TotalPages, UiText.NotificationsPagination, page => Url.Action("Index", "Activity", new { notificationsPage = page, logsPage = logs.Page }, null, null, "notifications")!))" />
+            }
+        </div>
+    </section>
+
+    <section id="logs" class="card" aria-labelledby="logs-title">
+        <header class="card-header">
+            <h2 id="logs-title">@UiText.LogsTitle</h2>
+            <p class="muted">@UiText.LogsHint</p>
+        </header>
+
+        <div class="data-list">
+            @if (logs.Error is not null)
+            {
+                <div class="alert alert-error" role="alert">
+                    <strong>@logs.Error</strong>
+                    @if (!string.IsNullOrEmpty(logs.CorrelationId))
+                    {
+                        <span class="alert-meta">@UiText.CorrelationId: <code>@logs.CorrelationId</code></span>
+                    }
+                </div>
+            }
+            else if (logs.TotalCount == 0)
+            {
+                <p class="empty">@UiText.NoLogs</p>
+            }
+            else
+            {
+                <div class="list-meta">
+                    <span class="count">@UiText.LogCount(logs.TotalCount)</span>
+                    <a class="link" href="@Url.Action("Index", "Activity", new { notificationsPage = notifications.Page, logsPage = logs.Page }, null, null, "logs")">@UiText.Refresh</a>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">@UiText.OrderColumn</th>
+                                <th scope="col">@UiText.StatusColumn</th>
+                                <th scope="col">@UiText.CreatedColumn</th>
+                                <th scope="col">@UiText.ProcessedColumn</th>
+                                <th scope="col">@UiText.LogColumn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in logs.Items)
+                            {
+                                <tr>
+                                    <td class="cell-id cell-wide" data-label="@UiText.OrderColumn"><code>@log.OrderId</code></td>
+                                    <td class="cell-status" data-label="@UiText.StatusColumn">
+                                        <span class="status @DisplayFormat.StatusClass(log.Status)">@UiText.Status(log.Status)</span>
+                                    </td>
+                                    <td data-label="@UiText.CreatedColumn"><partial name="_Time" model="log.CreatedAt" /></td>
+                                    <td data-label="@UiText.ProcessedColumn"><partial name="_Time" model="log.ProcessedAt" /></td>
+                                    <td class="cell-text cell-wide" data-label="@UiText.LogColumn">
+                                        @if (log.Log is { } value)
+                                        {
+                                            <code class="log-value">@value</code>
+                                        }
+                                        else
+                                        {
+                                            <span class="muted">@UiText.LogMissing</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <partial name="_Pager" model="@(new PagerViewModel(logs.Page, logs.TotalPages, UiText.LogsPagination, page => Url.Action("Index", "Activity", new { notificationsPage = notifications.Page, logsPage = page }, null, null, "logs")!))" />
+            }
+        </div>
+
+        <p class="footnote">@UiText.TimeZoneNote</p>
+    </section>
+</div>

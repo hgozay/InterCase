@@ -51,6 +51,20 @@ namespace InterCase.Service.Services.OtherServices
             }
         }
 
+        public async Task<string?> GetStringAsync(string key)
+        {
+            try
+            {
+                var payload = await manager.GetAsync(key);
+                return payload is null ? null : Encoding.UTF8.GetString(payload);
+            }
+            catch (CacheUnavailableException ex)
+            {
+                logger.LogWarning(ex, "Cache read failed for {CacheKey}", key);
+                return null;
+            }
+        }
+
         public async Task SetStringAsync(string key, string value)
         {
             try

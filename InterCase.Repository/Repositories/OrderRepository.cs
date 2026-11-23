@@ -9,13 +9,25 @@ namespace InterCase.Repository.Repositories
     public sealed class OrderRepository(AppDbContext context) : BaseRepository<Order>(context), IOrderRepository
     {
         protected override IQueryable<Order> Query(bool trackChanges) =>
-            base.Query(trackChanges).Include(o => o.User);
+            base.Query(trackChanges)
+                .Include(o => o.User)
+                .Include(o => o.Notifications);
 
         public Task<List<Order>> GetByUserIdAsync(Guid userPublicId, CancellationToken ct = default) =>
             Query(trackChanges: false)
                 .Where(o => o.User.PublicId == userPublicId)
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync(ct);
+
+        public Task<(List<Order> Items, int TotalCount)> GetPageByUserIdAsync(Guid userPublicId, OrderStatus? status, int page, int pageSize, CancellationToken ct = default) =>
+            ToPageAsync(
+                Query(trackChanges: false)
+                    .Where(o => o.User.PublicId == userPublicId && (status == null || o.Status == status))
+                    .OrderByDescending(o => o.CreatedAt)
+                    .ThenByDescending(o => o.Id),
+                page,
+                pageSize,
+                ct);
 
         public Task<List<Order>> GetStalePendingAsync(DateTime olderThanUtc, CancellationToken ct = default) =>
             Query(trackChanges: false)

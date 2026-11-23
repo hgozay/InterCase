@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InterCase.UI.Controllers
 {
     [AllowAnonymous]
-    public sealed class LanguageController : Controller
+    public sealed class LanguageController : BaseController
     {
         [HttpPost("language")]
         public IActionResult Set(string? language, string? returnUrl)
@@ -22,7 +22,7 @@ namespace InterCase.UI.Controllers
                     SameSite = SameSiteMode.Lax
                 });
 
-            return Url.IsLocalUrl(returnUrl) ? LocalRedirect(returnUrl) : RedirectToAction(nameof(OrdersController.Index), "Orders");
+            return RedirectToLocal(returnUrl);
         }
     }
 }

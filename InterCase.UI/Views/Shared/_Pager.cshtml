@@ -1,0 +1,43 @@
+@model PagerViewModel
+@if (Model.TotalPages > 1)
+{
+    <nav class="pager" aria-label="@Model.Label">
+        @if (Model.Page > 1)
+        {
+            <a class="pager-step" href="@Model.UrlFor(Model.Page - 1)" rel="prev">‹ @UiText.PreviousPage</a>
+        }
+        else
+        {
+            <span class="pager-step is-disabled" aria-hidden="true">‹ @UiText.PreviousPage</span>
+        }
+
+        <span class="pager-status">@UiText.PageOf(Model.Page, Model.TotalPages)</span>
+
+        <ol class="pager-pages">
+            @foreach (var slot in Model.Slots())
+            {
+                if (slot is not { } pageNumber)
+                {
+                    <li class="pager-gap" aria-hidden="true">…</li>
+                }
+                else if (pageNumber == Model.Page)
+                {
+                    <li><span class="pager-page is-current" aria-current="page" aria-label="@UiText.PageLabel(pageNumber)">@pageNumber</span></li>
+                }
+                else
+                {
+                    <li><a class="pager-page" href="@Model.UrlFor(pageNumber)" aria-label="@UiText.PageLabel(pageNumber)">@pageNumber</a></li>
+                }
+            }
+        </ol>
+
+        @if (Model.Page < Model.TotalPages)
+        {
+            <a class="pager-step" href="@Model.UrlFor(Model.Page + 1)" rel="next">@UiText.NextPage ›</a>
+        }
+        else
+        {
+            <span class="pager-step is-disabled" aria-hidden="true">@UiText.NextPage ›</span>
+        }
+    </nav>
+}

@@ -38,5 +38,19 @@ namespace InterCase.Repository.Repositories
         public void Update(TEntity entity) => Context.Set<TEntity>().Update(entity);
 
         public void Delete(TEntity entity) => Context.Set<TEntity>().Remove(entity);
+
+        protected static async Task<(List<TEntity> Items, int TotalCount)> ToPageAsync(
+            IOrderedQueryable<TEntity> query,
+            int page,
+            int pageSize,
+            CancellationToken ct)
+        {
+            var totalCount = await query.CountAsync(ct);
+            var items = totalCount == 0
+                ? []
+                : await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
+
+            return (items, totalCount);
+        }
     }
 }

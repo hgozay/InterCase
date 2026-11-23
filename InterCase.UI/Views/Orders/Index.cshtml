@@ -3,7 +3,7 @@
     ViewData["Title"] = UiText.OrdersTitle;
 }
 
-<div class="layout">
+<div class="stack">
     <section class="card" aria-labelledby="new-order-title">
         <header class="card-header">
             <h1 id="new-order-title">@UiText.NewOrder</h1>
@@ -22,7 +22,7 @@
             </div>
         }
 
-        <form method="post" asp-controller="Orders" asp-action="Create" class="form" novalidate data-busy-text="@UiText.Sending">
+        <form method="post" asp-controller="Orders" asp-action="Create" class="form form-grid" novalidate data-busy-text="@UiText.Sending">
             <div class="field">
                 <label asp-for="Form.UserId" class="label">@UiText.UserId</label>
                 <input asp-for="Form.UserId" class="input mono" readonly aria-describedby="user-id-hint" />
@@ -60,7 +60,9 @@
                 <span asp-validation-for="Form.PaymentMethod" class="field-error"></span>
             </fieldset>
 
-            <button type="submit" class="btn btn-primary btn-block">@UiText.PlaceOrder</button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-block">@UiText.PlaceOrder</button>
+            </div>
         </form>
     </section>
 
@@ -68,17 +70,6 @@
         <header class="card-header">
             <h2 id="orders-title">@UiText.OrdersTitle</h2>
         </header>
-
-        @if (Model.CreatedOrder is { } created)
-        {
-            <div class="alert alert-success" role="status">
-                <strong>@UiText.OrderAccepted</strong>
-                @if (!string.IsNullOrEmpty(created.CorrelationId))
-                {
-                    <span class="alert-meta">@UiText.CorrelationId: <code>@created.CorrelationId</code></span>
-                }
-            </div>
-        }
 
         <partial name="_OrderList" model="Model.List" />
     </section>

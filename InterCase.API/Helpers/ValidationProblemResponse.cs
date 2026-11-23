@@ -28,8 +28,15 @@ namespace InterCase.API.Helpers
         private static string ToFieldName(string key)
         {
             var field = key.TrimStart('$').TrimStart('.');
-            return string.IsNullOrEmpty(field) ? key : field;
+            return string.IsNullOrEmpty(field)
+                ? key
+                : string.Join('.', field.Split('.').Select(ToCamelCase));
         }
+
+        private static string ToCamelCase(string segment) =>
+            segment.Length == 0 || char.IsLower(segment[0])
+                ? segment
+                : char.ToLowerInvariant(segment[0]) + segment[1..];
 
         private static string DescribeInvalidInput(string field) =>
             field.StartsWith('$') || string.IsNullOrEmpty(field)

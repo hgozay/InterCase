@@ -6,10 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InterCase.API.Controllers
 {
-    [ApiController]
     [AllowAnonymous]
     [Route("language")]
-    public sealed class LanguageController : ControllerBase
+    public sealed class LanguageController : BaseController
     {
         [HttpGet]
         public ActionResult<LanguageResponse> Get() =>

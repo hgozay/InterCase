@@ -5,7 +5,7 @@ namespace InterCase.UI.Controllers
 {
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]
-    public sealed class ErrorController : Controller
+    public sealed class ErrorController : BaseController
     {
         [Route("error/{statusCode:int?}")]
         public IActionResult Index(int? statusCode)

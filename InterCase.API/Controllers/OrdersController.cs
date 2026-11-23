@@ -1,49 +1,37 @@
-using InterCase.API.Helpers;
 using InterCase.Common.Dtos.Orders;
+using InterCase.Common.Dtos.Paging;
 using InterCase.Common.Helpers;
-using InterCase.Service.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InterCase.API.Controllers
 {
-    [ApiController]
-    [Authorize]
     [Route("orders")]
-    public sealed class OrdersController(IServiceManager serviceManager) : ControllerBase
+    public sealed class OrdersController : BaseController
     {
         [HttpPost]
-        public async Task<ActionResult<OrderResponse>> Create(CreateOrderRequest request, CancellationToken ct)
-        {
-            if (!User.Owns(request.UserId!.Value))
-                return Forbid();
-
-            var order = await serviceManager.Order.CreateAsync(request, ct);
-            return Accepted(order);
-        }
+        public async Task<ActionResult<OrderResponse>> Create(CreateOrderRequest request, CancellationToken ct) =>
+            DenyIfNotOwner(request.UserId!.Value) ?? Accepted(await ServiceManager.Order.CreateAsync(request, ct));
 
         [HttpGet("{userId}")]
         public async Task<ActionResult<IReadOnlyList<OrderResponse>>> GetByUserId(
             [FromRoute, NotEmptyGuid(ErrorMessage = Localization.Keys.UserIdEmpty)] Guid userId,
-            CancellationToken ct)
-        {
-            if (!User.Owns(userId))
-                return Forbid();
+            CancellationToken ct) =>
+            DenyIfNotOwner(userId) ?? Ok(await ServiceManager.Order.GetByUserIdAsync(userId, ct));
 
-            var orders = await serviceManager.Order.GetByUserIdAsync(userId, ct);
-            return Ok(orders);
-        }
+        [HttpGet("{userId}/logs")]
+        public async Task<ActionResult<PagedResponse<OrderLogResponse>>> GetLogsByUserId(
+            [FromRoute, NotEmptyGuid(ErrorMessage = Localization.Keys.UserIdEmpty)] Guid userId,
+            [FromQuery] PageRequest paging,
+            CancellationToken ct) =>
+            DenyIfNotOwner(userId) ?? Ok(await ServiceManager.Order.GetLogsByUserIdAsync(userId, paging, ct));
 
         [HttpGet("by-id/{id}")]
         public async Task<ActionResult<OrderResponse>> GetById(
             [FromRoute, NotEmptyGuid(ErrorMessage = Localization.Keys.OrderIdEmpty)] Guid id,
             CancellationToken ct)
         {
-            var order = await serviceManager.Order.GetByPublicIdAsync(id, ct);
-            if (order is null)
-                return NotFound();
-
-            return User.Owns(order.UserId) ? Ok(order) : Forbid();
+            var order = await ServiceManager.Order.GetByPublicIdAsync(id, ct);
+            return DenyIfNotFoundOrNotOwner(order, o => o.UserId) ?? Ok(order);
         }
 
         [HttpPut("{id}")]
@@ -52,15 +40,8 @@ namespace InterCase.API.Controllers
             UpdateOrderRequest request,
             CancellationToken ct)
         {
-            var existing = await serviceManager.Order.GetByPublicIdAsync(id, ct);
-            if (existing is null)
-                return NotFound();
-
-            if (!User.Owns(existing.UserId))
-                return Forbid();
-
-            var order = await serviceManager.Order.UpdateAsync(id, request, ct);
-            return Ok(order);
+            var existing = await ServiceManager.Order.GetByPublicIdAsync(id, ct);
+            return DenyIfNotFoundOrNotOwner(existing, o => o.UserId) ?? Ok(await ServiceManager.Order.UpdateAsync(id, request, ct));
         }
 
         [HttpDelete("{id}")]
@@ -68,14 +49,11 @@ namespace InterCase.API.Controllers
             [FromRoute, NotEmptyGuid(ErrorMessage = Localization.Keys.OrderIdEmpty)] Guid id,
             CancellationToken ct)
         {
-            var existing = await serviceManager.Order.GetByPublicIdAsync(id, ct);
-            if (existing is null)
-                return NotFound();
+            var existing = await ServiceManager.Order.GetByPublicIdAsync(id, ct);
+            if (DenyIfNotFoundOrNotOwner(existing, o => o.UserId) is { } denied)
+                return denied;
 
-            if (!User.Owns(existing.UserId))
-                return Forbid();
-
-            await serviceManager.Order.DeleteAsync(id, ct);
+            await ServiceManager.Order.DeleteAsync(id, ct);
             return NoContent();
         }
     }

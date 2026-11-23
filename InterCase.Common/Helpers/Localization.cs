@@ -17,6 +17,8 @@ namespace InterCase.Common.Helpers
             public const string ProductIdRequired = "ProductIdRequired";
             public const string ProductIdEmpty = "ProductIdEmpty";
             public const string OrderIdEmpty = "OrderIdEmpty";
+            public const string PageInvalid = "PageInvalid";
+            public const string PageSizeInvalid = "PageSizeInvalid";
             public const string QuantityRequired = "QuantityRequired";
             public const string QuantityRange = "QuantityRange";
             public const string PaymentMethodRequired = "PaymentMethodRequired";
@@ -46,6 +48,8 @@ namespace InterCase.Common.Helpers
             [Keys.ProductIdRequired] = new() { [English] = "productId is required.", [Turkish] = "productId zorunludur." },
             [Keys.ProductIdEmpty] = new() { [English] = "productId cannot be an empty GUID.", [Turkish] = "productId boş GUID olamaz." },
             [Keys.OrderIdEmpty] = new() { [English] = "id cannot be an empty GUID.", [Turkish] = "id boş GUID olamaz." },
+            [Keys.PageInvalid] = new() { [English] = "page must be 1 or greater.", [Turkish] = "page 1 ya da daha büyük olmalıdır." },
+            [Keys.PageSizeInvalid] = new() { [English] = "pageSize must be between 1 and 100.", [Turkish] = "pageSize 1 ile 100 arasında olmalıdır." },
             [Keys.QuantityRequired] = new() { [English] = "quantity is required.", [Turkish] = "quantity zorunludur." },
             [Keys.QuantityRange] = new() { [English] = "quantity must be between 1 and 1000.", [Turkish] = "quantity 1 ile 1000 arasında olmalıdır." },
             [Keys.PaymentMethodRequired] = new() { [English] = "paymentMethod is required.", [Turkish] = "paymentMethod zorunludur." },

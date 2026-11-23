@@ -113,9 +113,9 @@ try
             options.ModelMetadataDetailsProviders.Add(new SystemTextJsonValidationMetadataProvider());
 
             var messages = options.ModelBindingMessageProvider;
-            messages.SetAttemptedValueIsInvalidAccessor((_, field) => Localization.Format(Localization.Keys.InvalidValue, field));
-            messages.SetUnknownValueIsInvalidAccessor(field => Localization.Format(Localization.Keys.InvalidValue, field));
-            messages.SetValueMustNotBeNullAccessor(field => Localization.Format(Localization.Keys.InvalidValue, field));
+            messages.SetAttemptedValueIsInvalidAccessor((_, _) => string.Empty);
+            messages.SetUnknownValueIsInvalidAccessor(_ => string.Empty);
+            messages.SetValueMustNotBeNullAccessor(_ => string.Empty);
             messages.SetValueIsInvalidAccessor(_ => string.Empty);
             messages.SetNonPropertyAttemptedValueIsInvalidAccessor(_ => string.Empty);
             messages.SetNonPropertyUnknownValueIsInvalidAccessor(() => string.Empty);

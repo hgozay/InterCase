@@ -14,6 +14,10 @@ builder.Services.AddOptions<ApiOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 builder.Services.Configure<DemoUserOptions>(builder.Configuration.GetSection(DemoUserOptions.SectionName));
+builder.Services.AddOptions<RabbitMqPanelOptions>()
+    .Bind(builder.Configuration.GetSection(RabbitMqPanelOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ApiRequestHandler>();

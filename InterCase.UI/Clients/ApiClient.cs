@@ -3,7 +3,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using InterCase.Common;
 using InterCase.Common.Dtos.Auth;
+using InterCase.Common.Dtos.Notifications;
 using InterCase.Common.Dtos.Orders;
+using InterCase.Common.Dtos.Paging;
 using InterCase.Common.Dtos.Users;
 using InterCase.UI.Helpers;
 using InterCase.UI.Models;
@@ -38,6 +40,12 @@ namespace InterCase.UI.Clients
 
         public Task<ApiResult<List<OrderResponse>>> GetOrdersAsync(Guid userId, CancellationToken ct) =>
             SendAsync<List<OrderResponse>>(HttpMethod.Get, $"orders/{userId}", null, ct);
+
+        public Task<ApiResult<PagedResponse<OrderLogResponse>>> GetOrderLogsAsync(Guid userId, int page, int pageSize, CancellationToken ct) =>
+            SendAsync<PagedResponse<OrderLogResponse>>(HttpMethod.Get, $"orders/{userId}/logs?page={page}&pageSize={pageSize}", null, ct);
+
+        public Task<ApiResult<PagedResponse<NotificationResponse>>> GetNotificationsAsync(Guid userId, int page, int pageSize, CancellationToken ct) =>
+            SendAsync<PagedResponse<NotificationResponse>>(HttpMethod.Get, $"notifications/{userId}?page={page}&pageSize={pageSize}", null, ct);
 
         private async Task<ApiResult<T>> SendAsync<T>(HttpMethod method, string path, object? body, CancellationToken ct)
         {

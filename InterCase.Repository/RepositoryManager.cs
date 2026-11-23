@@ -13,7 +13,7 @@ namespace InterCase.Repository
         private readonly Lazy<IUserRepository> _user;
         private readonly Lazy<IBaseRepository<UserLogin>> _userLogin;
         private readonly Lazy<IOrderRepository> _order;
-        private readonly Lazy<IBaseRepository<Notification>> _notification;
+        private readonly Lazy<INotificationRepository> _notification;
         private IDbContextTransaction? _transaction;
 
         public RepositoryManager(AppDbContext context)
@@ -22,13 +22,13 @@ namespace InterCase.Repository
             _user = new Lazy<IUserRepository>(() => new UserRepository(context));
             _userLogin = new Lazy<IBaseRepository<UserLogin>>(() => new UserLoginRepository(context));
             _order = new Lazy<IOrderRepository>(() => new OrderRepository(context));
-            _notification = new Lazy<IBaseRepository<Notification>>(() => new NotificationRepository(context));
+            _notification = new Lazy<INotificationRepository>(() => new NotificationRepository(context));
         }
 
         public IUserRepository User => _user.Value;
         public IBaseRepository<UserLogin> UserLogin => _userLogin.Value;
         public IOrderRepository Order => _order.Value;
-        public IBaseRepository<Notification> Notification => _notification.Value;
+        public INotificationRepository Notification => _notification.Value;
 
         public int SaveChanges()
         {

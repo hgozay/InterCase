@@ -36,8 +36,13 @@ namespace InterCase.Service
             timeProvider,
             loggerFactory.CreateLogger<OrderService>()));
 
+        private readonly Lazy<INotificationService> _notification = new(() => new NotificationService(
+            repositoryManager,
+            mapper));
+
         public IUserService User => _user.Value;
         public IOrderService Order => _order.Value;
+        public INotificationService Notification => _notification.Value;
         public ICacheService Cache => cache;
         public IQueueService Queue => queue;
 

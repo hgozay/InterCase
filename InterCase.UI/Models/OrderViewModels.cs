@@ -19,8 +19,13 @@ namespace InterCase.UI.Models
         public IReadOnlyList<OrderResponse> Orders { get; init; } = [];
         public string? Error { get; init; }
         public string? CorrelationId { get; init; }
-        public Guid? HighlightedOrderId { get; init; }
+        public CreatedOrderNotice? CreatedOrder { get; init; }
+        public int Page { get; init; } = 1;
+        public int TotalPages { get; init; } = 1;
+        public int TotalCount { get; init; }
 
+        public Guid? HighlightedOrderId => CreatedOrder?.OrderId;
+        public OrderResponse? HighlightedOrder => Orders.FirstOrDefault(o => o.Id == HighlightedOrderId);
         public bool HasUser => !string.IsNullOrEmpty(UserId);
         public bool HasActiveOrders => Orders.Any(o => o.Status is OrderStatus.Pending or OrderStatus.Processing);
     }
@@ -31,6 +36,5 @@ namespace InterCase.UI.Models
         public OrderListViewModel List { get; init; } = new();
         public string? FormError { get; init; }
         public string? FormCorrelationId { get; init; }
-        public CreatedOrderNotice? CreatedOrder { get; init; }
     }
 }

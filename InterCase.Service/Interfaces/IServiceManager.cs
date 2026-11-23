@@ -4,6 +4,7 @@ namespace InterCase.Service.Interfaces
     {
         IUserService User { get; }
         IOrderService Order { get; }
+        INotificationService Notification { get; }
         ICacheService Cache { get; }
         IQueueService Queue { get; }
 

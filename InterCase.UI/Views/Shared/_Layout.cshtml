@@ -1,5 +1,6 @@
 @using Microsoft.Extensions.Options
 @inject IOptions<ApiOptions> ApiOptions
+@inject IOptions<RabbitMqPanelOptions> RabbitMqPanelOptions
 @{
     var apiBaseUrl = ApiOptions.Value.BaseUrl.TrimEnd('/');
     var returnUrl = HttpMethods.IsGet(Context.Request.Method)
@@ -7,6 +8,7 @@
         : $"{Context.Request.PathBase}{Context.Request.Path}";
     var currentLanguage = Localization.CurrentLanguage;
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var currentController = ViewContext.RouteData.Values["controller"] as string;
 }
 <!DOCTYPE html>
 <html lang="@currentLanguage">
@@ -51,6 +53,17 @@
                 }
             </div>
         </div>
+
+        @if (isAuthenticated)
+        {
+            <nav class="container topnav" aria-label="@UiText.MainNavigation">
+                @foreach (var (controller, text) in new[] { ("Orders", UiText.OrdersTitle), ("Activity", UiText.ActivityTitle) })
+                {
+                    var isCurrent = currentController == controller;
+                    <a class="topnav-link @(isCurrent ? "is-active" : null)" href="@Url.Action("Index", controller)" aria-current="@(isCurrent ? "page" : null)">@text</a>
+                }
+            </nav>
+        }
     </header>
 
     <main class="container main">
@@ -58,9 +71,13 @@
     </main>
 
     <footer class="container footer">
-        <span>@UiText.ApiLinks</span>
+        <span>@UiText.DevTools</span>
         <a href="@apiBaseUrl/swagger" target="_blank" rel="noopener">Swagger</a>
         <a href="@apiBaseUrl/hangfire" target="_blank" rel="noopener">Hangfire</a>
+        @if (isAuthenticated && RabbitMqPanelOptions.Value.IsConfigured)
+        {
+            <a asp-controller="Tools" asp-action="RabbitMq" target="_blank" rel="noopener">RabbitMQ</a>
+        }
     </footer>
 
     <script src="~/js/site.js" asp-append-version="true"></script>

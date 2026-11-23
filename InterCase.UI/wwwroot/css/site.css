@@ -77,7 +77,7 @@ code {
 
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1680px;
     margin: 0 auto;
     padding: 0 16px;
 }
@@ -138,6 +138,41 @@ code {
 .brand-text small {
     color: var(--text-muted);
     font-size: .75rem;
+}
+
+.topnav {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.topnav-link {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    min-height: 44px;
+    padding: 0 12px;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-size: .875rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.topnav-link:hover {
+    color: var(--text);
+}
+
+.topnav-link.is-active {
+    border-bottom-color: var(--primary);
+    color: var(--primary);
+}
+
+.topnav-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus);
 }
 
 .topbar-actions {
@@ -235,7 +270,7 @@ code {
     color: var(--text-secondary);
 }
 
-.layout {
+.stack {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
@@ -244,7 +279,7 @@ code {
 
 .card {
     min-width: 0;
-    scroll-margin-top: 76px;
+    scroll-margin-top: 124px;
     padding: 20px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -506,15 +541,9 @@ code {
     color: var(--info);
 }
 
-.lookup {
-    display: grid;
-    gap: 6px;
-    margin-bottom: 16px;
-}
-
-.order-list {
+.data-list {
     min-width: 0;
-    container: order-list / inline-size;
+    container: data-list / inline-size;
 }
 
 .empty {
@@ -571,14 +600,14 @@ code {
     border-radius: var(--radius-sm);
 }
 
-.orders {
+.data-table {
     width: 100%;
     border-collapse: collapse;
     font-size: .875rem;
 }
 
-.orders th {
-    padding: 10px 12px;
+.data-table th {
+    padding: 10px;
     border-bottom: 1px solid var(--border);
     background: var(--surface-muted);
     color: var(--text-muted);
@@ -590,32 +619,161 @@ code {
     white-space: nowrap;
 }
 
-.orders td {
-    padding: 10px 12px;
+.data-table td {
+    padding: 10px;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
     white-space: nowrap;
 }
 
-.orders tbody tr:last-child td {
+.data-table tbody tr:last-child td {
     border-bottom: 0;
 }
 
-.orders .num {
+.data-table .num {
     text-align: right;
     font-variant-numeric: tabular-nums;
 }
 
-.orders tr.is-new td {
+.data-table tr.is-new td {
     background: var(--primary-soft);
 }
 
-.orders tr.is-new td:first-child {
+.data-table tr.is-new td:first-child {
     box-shadow: inset 3px 0 0 var(--primary);
 }
 
-.orders code {
+.data-table code {
     color: var(--text-secondary);
+}
+
+.data-table .cell-text {
+    min-width: 240px;
+    white-space: normal;
+}
+
+.id-value {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+}
+
+.id-value .tag {
+    margin-left: 0;
+}
+
+.channel {
+    display: inline-block;
+    padding: 1px 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--text-secondary);
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+.notification {
+    display: grid;
+    gap: 2px;
+}
+
+.notification-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.notification-meta .time {
+    flex-direction: row;
+    gap: 6px;
+    align-items: baseline;
+}
+
+.notification-text {
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.log-value {
+    overflow-wrap: anywhere;
+}
+
+.pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 12px;
+    font-size: .875rem;
+}
+
+.pager-pages {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pager-step,
+.pager-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+}
+
+.pager-page {
+    padding: 0 8px;
+}
+
+a.pager-step:hover,
+a.pager-page:hover {
+    background: var(--surface-muted);
+}
+
+.pager-step:focus-visible,
+.pager-page:focus-visible {
+    outline: none;
+    box-shadow: var(--focus);
+}
+
+.pager-page.is-current {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.pager-step.is-disabled {
+    color: var(--text-muted);
+    opacity: .55;
+}
+
+.pager-gap {
+    min-width: 24px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.pager-status {
+    display: none;
+    padding: 0 8px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
 }
 
 .tag {
@@ -804,19 +962,37 @@ code {
     }
 }
 
+@media (min-width: 768px) {
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+    }
+
+    .form-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .form-actions .btn-block {
+        width: auto;
+        min-width: 220px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .form-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 160px) minmax(0, 1fr);
+    }
+}
+
 @media (min-width: 960px) {
     .main {
         padding-top: 32px;
     }
 
-    .layout {
-        grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+    .stack {
         gap: 24px;
-    }
-
-    .layout > .card:first-child {
-        position: sticky;
-        top: 84px;
     }
 
     .card {
@@ -824,28 +1000,28 @@ code {
     }
 }
 
-@container order-list (max-width: 679px) {
+@container data-list (max-width: 899px) {
     .table-wrap {
         overflow: visible;
         border: 0;
         border-radius: 0;
     }
 
-    .orders thead {
+    .data-table thead {
         display: none;
     }
 
-    .orders,
-    .orders tbody {
+    .data-table,
+    .data-table tbody {
         display: block;
     }
 
-    .orders tbody {
+    .data-table tbody {
         display: grid;
         gap: 10px;
     }
 
-    .orders tr {
+    .data-table tr {
         display: grid;
         grid-template-columns: minmax(0, 1fr);
         column-gap: 24px;
@@ -855,19 +1031,19 @@ code {
         background: var(--surface);
     }
 
-    .orders tr.is-new {
+    .data-table tr.is-new {
         border-color: var(--primary);
         background: var(--primary-soft);
     }
 
-    .orders tr.is-new td,
-    .orders tr.is-new td:first-child {
+    .data-table tr.is-new td,
+    .data-table tr.is-new td:first-child {
         background: transparent;
         box-shadow: none;
     }
 
-    .orders td,
-    .orders tbody tr:last-child td {
+    .data-table td,
+    .data-table tbody tr:last-child td {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -880,7 +1056,7 @@ code {
         text-align: right;
     }
 
-    .orders td::before {
+    .data-table td::before {
         content: attr(data-label);
         flex: none;
         color: var(--text-muted);
@@ -889,15 +1065,31 @@ code {
         text-align: left;
     }
 
-    .orders .cell-id {
+    .data-table .cell-wide {
+        grid-column: 1 / -1;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        text-align: left;
+    }
+
+    .data-table .cell-text {
+        min-width: 0;
+    }
+
+    .data-table code {
+        overflow-wrap: anywhere;
+    }
+
+    .data-table .cell-id {
         order: -2;
     }
 
-    .orders .cell-status {
+    .data-table .cell-status {
         order: -1;
     }
 
-    .orders .time {
+    .data-table .time {
         flex-direction: row-reverse;
         flex-wrap: wrap;
         justify-content: flex-end;
@@ -905,18 +1097,30 @@ code {
         align-items: baseline;
     }
 
-    .orders .time-date {
+    .data-table .time-date {
         font-size: inherit;
     }
 }
 
-@container order-list (min-width: 440px) and (max-width: 679px) {
-    .orders tr {
+@container data-list (min-width: 560px) and (max-width: 899px) {
+    .data-table tr {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 559px) {
+    .pager-pages {
+        display: none;
+    }
+
+    .pager-status {
+        display: inline;
+    }
+
+    .pager-step {
+        flex: 1;
+    }
+
     .brand-text small,
     .user-chip {
         display: none;

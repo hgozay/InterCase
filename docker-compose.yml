@@ -30,6 +30,9 @@ services:
       - "127.0.0.1:15672:15672"
     volumes:
       - rabbitmqdata:/var/lib/rabbitmq
+      - ./docker/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+      - ./docker/rabbitmq/advanced.config:/etc/rabbitmq/advanced.config:ro
+      - ./docker/rabbitmq/conf.d/20-management-oauth.conf:/etc/rabbitmq/conf.d/20-management-oauth.conf:ro
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s

@@ -1,10 +1,28 @@
 @model OrderListViewModel
 
-<div class="order-list"
+<div class="data-list"
      data-order-list
-     data-url="@Url.Action("List", "Orders", new { highlight = Model.HighlightedOrderId })"
+     data-url="@Url.Action("List", "Orders", new { highlight = Model.HighlightedOrderId, correlationId = Model.CreatedOrder?.CorrelationId, ordersPage = Model.Page })"
      data-active="@(Model.HasActiveOrders ? "true" : "false")"
      aria-live="polite">
+    @if (Model.CreatedOrder is { } created && Model.Error is null)
+    {
+        var (noticeClass, noticeText) = Model.HighlightedOrder?.Status switch
+        {
+            OrderStatus.Processed => ("alert-success", UiText.OrderCompleted),
+            OrderStatus.Failed => ("alert-error", UiText.OrderFailed),
+            OrderStatus.Processing => ("alert-info", UiText.OrderInProgress),
+            _ => ("alert-info", UiText.OrderAccepted)
+        };
+        <div class="alert @noticeClass" role="status">
+            <strong>@noticeText</strong>
+            @if (!string.IsNullOrEmpty(created.CorrelationId))
+            {
+                <span class="alert-meta">@UiText.CorrelationId: <code>@created.CorrelationId</code></span>
+            }
+        </div>
+    }
+
     @if (Model.Error is not null)
     {
         <div class="alert alert-error" role="alert">
@@ -19,23 +37,23 @@
     {
         <p class="empty">@UiText.EnterUserId</p>
     }
-    else if (Model.Orders.Count == 0)
+    else if (Model.TotalCount == 0)
     {
         <p class="empty">@UiText.NoOrders</p>
     }
     else
     {
         <div class="list-meta">
-            <span class="count">@UiText.OrderCount(Model.Orders.Count)</span>
+            <span class="count">@UiText.OrderCount(Model.TotalCount)</span>
             @if (Model.HasActiveOrders)
             {
                 <span class="live"><span class="live-dot" aria-hidden="true"></span>@UiText.LiveUpdating</span>
             }
-            <a class="link" asp-controller="Orders" asp-action="Index">@UiText.Refresh</a>
+            <a class="link" href="@Url.Action("Index", "Orders", new { ordersPage = Model.Page }, null, null, "orders")">@UiText.Refresh</a>
         </div>
 
         <div class="table-wrap">
-            <table class="orders">
+            <table class="data-table">
                 <thead>
                     <tr>
                         <th scope="col">@UiText.OrderColumn</th>
@@ -45,6 +63,7 @@
                         <th scope="col">@UiText.StatusColumn</th>
                         <th scope="col">@UiText.CreatedColumn</th>
                         <th scope="col">@UiText.ProcessedColumn</th>
+                        <th scope="col">@UiText.NotificationColumn</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,14 +71,16 @@
                     {
                         var isNew = order.Id == Model.HighlightedOrderId;
                         <tr class="@(isNew ? "is-new" : null)">
-                            <td class="cell-id" data-label="@UiText.OrderColumn">
-                                <code title="@order.Id">…@DisplayFormat.ShortId(order.Id)</code>
-                                @if (isNew)
-                                {
-                                    <span class="tag">@UiText.NewBadge</span>
-                                }
+                            <td class="cell-id cell-wide" data-label="@UiText.OrderColumn">
+                                <span class="id-value">
+                                    <code>@order.Id</code>
+                                    @if (isNew)
+                                    {
+                                        <span class="tag">@UiText.NewBadge</span>
+                                    }
+                                </span>
                             </td>
-                            <td data-label="@UiText.ProductColumn"><code title="@order.ProductId">…@DisplayFormat.ShortId(order.ProductId)</code></td>
+                            <td class="cell-wide" data-label="@UiText.ProductColumn"><code>@order.ProductId</code></td>
                             <td class="num" data-label="@UiText.Quantity">@order.Quantity</td>
                             <td data-label="@UiText.PaymentColumn">@UiText.Payment(order.PaymentMethod)</td>
                             <td class="cell-status" data-label="@UiText.StatusColumn">
@@ -67,11 +88,29 @@
                             </td>
                             <td data-label="@UiText.CreatedColumn"><partial name="_Time" model="order.CreatedAt" /></td>
                             <td data-label="@UiText.ProcessedColumn"><partial name="_Time" model="order.ProcessedAt" /></td>
+                            <td class="cell-text cell-wide" data-label="@UiText.NotificationColumn">
+                                @if (order.Notification is { } notification)
+                                {
+                                    <span class="notification">
+                                        <span class="notification-meta">
+                                            <span class="channel">@UiText.Channel(notification.Channel)</span>
+                                            <partial name="_Time" model="notification.SentAt" />
+                                        </span>
+                                        <span class="notification-text">@notification.Message</span>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="muted">—</span>
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
+
+        <partial name="_Pager" model="@(new PagerViewModel(Model.Page, Model.TotalPages, UiText.OrdersPagination, page => Url.Action("Index", "Orders", new { ordersPage = page }, null, null, "orders")!))" />
 
         <p class="footnote">@UiText.TimeZoneNote</p>
     }

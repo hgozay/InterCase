@@ -1,0 +1,33 @@
+@model RabbitMqLoginViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="@Localization.CurrentLanguage">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="robots" content="noindex" />
+    <title>RabbitMQ · InterCase</title>
+    <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <main class="container main">
+        <section class="auth">
+            <div class="card auth-card">
+                <h1>RabbitMQ</h1>
+                <p class="muted">@UiText.OpeningRabbitMq</p>
+                <form id="rabbitmq-login" method="post" action="@Model.LoginUrl">
+                    <input type="hidden" name="access_token" value="@Model.AccessToken" />
+                    <noscript>
+                        <button type="submit" class="btn btn-primary btn-block">@UiText.OpenRabbitMq</button>
+                    </noscript>
+                </form>
+            </div>
+        </section>
+    </main>
+    <script>document.getElementById('rabbitmq-login').submit();</script>
+</body>
+</html>

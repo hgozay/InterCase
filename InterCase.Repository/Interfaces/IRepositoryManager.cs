@@ -7,7 +7,7 @@ namespace InterCase.Repository.Interfaces
         IUserRepository User { get; }
         IBaseRepository<UserLogin> UserLogin { get; }
         IOrderRepository Order { get; }
-        IBaseRepository<Notification> Notification { get; }
+        INotificationRepository Notification { get; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync(CancellationToken ct = default);

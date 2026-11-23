@@ -2,6 +2,7 @@ using System.Globalization;
 using AutoMapper;
 using InterCase.Common;
 using InterCase.Common.Dtos.Orders;
+using InterCase.Common.Dtos.Paging;
 using InterCase.Common.Helpers;
 using InterCase.Repository.Entities;
 using InterCase.Repository.Interfaces;
@@ -74,6 +75,20 @@ namespace InterCase.Service.Services.DbServices
             Logger.LogDebug("Cache miss for {CacheKey}, stored {Count} orders", key, response.Count);
 
             return response;
+        }
+
+        public async Task<PagedResponse<OrderLogResponse>> GetLogsByUserIdAsync(Guid userId, PageRequest paging, CancellationToken ct = default)
+        {
+            var (orders, totalCount) = await RepositoryManager.Order.GetPageByUserIdAsync(userId, OrderStatus.Processed, paging.Page, paging.PageSize, ct);
+            var items = new List<OrderLogResponse>(orders.Count);
+
+            foreach (var order in orders)
+            {
+                var log = await cache.GetStringAsync(CacheKeys.OrderLog(order.Id));
+                items.Add(Mapper.Map<OrderLogResponse>(order) with { Log = log });
+            }
+
+            return new PagedResponse<OrderLogResponse>(items, paging.Page, paging.PageSize, totalCount);
         }
 
         public async Task ProcessAsync(long orderId, CancellationToken ct = default)
