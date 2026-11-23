@@ -2,6 +2,10 @@ namespace InterCase.Service.Interfaces
 {
     public interface IServiceManager
     {
+        IOrderService Order { get; }
+        ICacheService Cache { get; }
+        IQueueService Queue { get; }
+
         int SaveChanges();
         Task<int> SaveChangesAsync(CancellationToken ct = default);
 

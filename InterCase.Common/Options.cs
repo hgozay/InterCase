@@ -55,8 +55,19 @@ namespace InterCase.Common
     {
         public const string SectionName = "Cache";
 
+        [EnumDataType(typeof(CacheProvider), ErrorMessage = "Cache:Provider is not a supported cache provider.")]
+        public CacheProvider Provider { get; set; } = CacheProvider.Redis;
+
         [Range(1, 86400, ErrorMessage = "Cache:OrdersTtlSeconds must be between 1 and 86400.")]
         public int OrdersTtlSeconds { get; set; } = 120;
+    }
+
+    public class QueueOptions
+    {
+        public const string SectionName = "Queue";
+
+        [EnumDataType(typeof(QueueProvider), ErrorMessage = "Queue:Provider is not a supported queue provider.")]
+        public QueueProvider Provider { get; set; } = QueueProvider.RabbitMq;
     }
 
     public class HangfireOptions

@@ -18,4 +18,14 @@ namespace InterCase.Common
         Processed = 3,
         Failed = 4
     }
+
+    public enum CacheProvider
+    {
+        Redis = 1
+    }
+
+    public enum QueueProvider
+    {
+        RabbitMq = 1
+    }
 }

@@ -1,9 +1,16 @@
 using System.Text.Json.Serialization;
 using InterCase.API.Helpers;
+using InterCase.Common;
 using InterCase.Common.Helpers;
 using InterCase.Repository;
 using InterCase.Repository.Context;
 using InterCase.Repository.Interfaces;
+using InterCase.Service;
+using InterCase.Service.Factories;
+using InterCase.Service.Interfaces;
+using InterCase.Service.Managers;
+using InterCase.Service.Mappings;
+using InterCase.Service.Services.OtherServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +24,33 @@ builder.Services.AddDbContext<AppDbContext>(options => options
     .UseNpgsql(postgresConnection)
     .UseSnakeCaseNamingConvention());
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
+
+builder.Services.AddOptions<CacheOptions>()
+    .Bind(builder.Configuration.GetSection(CacheOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+builder.Services.AddOptions<QueueOptions>()
+    .Bind(builder.Configuration.GetSection(QueueOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+builder.Services.AddOptions<RabbitMqOptions>()
+    .Bind(builder.Configuration.GetSection(RabbitMqOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// Ana servisler (CacheService, QueueService) geneldir; arkalarında çalışan manager appsettings'teki Cache:Provider ve Queue:Provider ayarından seçilir ve yalnızca seçilen manager ayağa kalkar.
+// Bugün Redis ve RabbitMQ; yeni bir sağlayıcı kendi manager sınıfı ve anahtarıyla buraya kaydedilir, factory'ler ve servisler değişmez.
+builder.Services.AddKeyedSingleton<ICacheManager, RedisCacheManager>(CacheProvider.Redis);
+builder.Services.AddKeyedSingleton<IQueueManager, RabbitMqQueueManager>(QueueProvider.RabbitMq);
+builder.Services.AddSingleton<ICacheManager>(CacheManagerFactory.Create);
+builder.Services.AddSingleton<IQueueManager>(QueueManagerFactory.Create);
+
+builder.Services.AddSingleton<ICacheService, CacheService>();
+builder.Services.AddSingleton<IQueueService, QueueService>();
+builder.Services.AddScoped<ICorrelationContext, CorrelationContext>();
+builder.Services.AddScoped<IServiceManager, ServiceManager>();
 
 builder.Services.Configure<RequestLocalizationOptions>(options => options
     .SetDefaultCulture(Localization.DefaultLanguage)
