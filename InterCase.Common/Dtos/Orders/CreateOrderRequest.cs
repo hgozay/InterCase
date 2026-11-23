@@ -1,10 +1,24 @@
+using System.ComponentModel.DataAnnotations;
+using InterCase.Common.Helpers;
+
 namespace InterCase.Common.Dtos.Orders
 {
     public sealed record CreateOrderRequest
     {
-        public required string UserId { get; init; }
-        public required string ProductId { get; init; }
-        public required int Quantity { get; init; }
-        public required PaymentMethod PaymentMethod { get; init; }
+        [Required(ErrorMessage = Localization.Keys.UserIdRequired)]
+        [MaxLength(64, ErrorMessage = Localization.Keys.UserIdMaxLength)]
+        public string UserId { get; init; } = string.Empty;
+
+        [Required(ErrorMessage = Localization.Keys.ProductIdRequired)]
+        [MaxLength(64, ErrorMessage = Localization.Keys.ProductIdMaxLength)]
+        public string ProductId { get; init; } = string.Empty;
+
+        [Required(ErrorMessage = Localization.Keys.QuantityRequired)]
+        [Range(1, 1000, ErrorMessage = Localization.Keys.QuantityRange)]
+        public int? Quantity { get; init; }
+
+        [Required(ErrorMessage = Localization.Keys.PaymentMethodRequired)]
+        [EnumDataType(typeof(PaymentMethod), ErrorMessage = Localization.Keys.PaymentMethodInvalid)]
+        public PaymentMethod? PaymentMethod { get; init; }
     }
 }

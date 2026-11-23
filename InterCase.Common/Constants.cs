@@ -14,5 +14,4 @@
     public static class AppHeaderNames
     {
         public const string CorrelationId = "X-Correlation-ID";
-    }
-}
+    }}

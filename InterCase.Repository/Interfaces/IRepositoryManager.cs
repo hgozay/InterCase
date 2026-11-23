@@ -1,0 +1,17 @@
+using InterCase.Repository.Entities;
+
+namespace InterCase.Repository.Interfaces
+{
+    public interface IRepositoryManager
+    {
+        IOrderRepository Order { get; }
+        IBaseRepository<Notification> Notification { get; }
+
+        int SaveChanges();
+        Task<int> SaveChangesAsync(CancellationToken ct = default);
+
+        Task BeginTransactionAsync(CancellationToken ct = default);
+        Task CommitTransactionAsync(CancellationToken ct = default);
+        Task RollbackTransactionAsync();
+    }
+}
