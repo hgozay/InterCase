@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="InterCase.API/InterCase.API.csproj" Id="cc6b003b-6bcc-4eae-a421-8e1f2d5f121a" />
+  <Project Path="InterCase.Common/InterCase.Common.csproj" Id="7678f9fc-465f-4170-9131-01070736f6c4" />
+  <Project Path="InterCase.Repository/InterCase.Repository.csproj" Id="5a1e754a-79b0-4ec7-8dc0-eb604a0fc445" />
+  <Project Path="InterCase.Service/InterCase.Service.csproj" Id="11a7059b-1b40-4337-bcf2-916aa5a680c9" />
+  <Project Path="InterCase.UnitTest/InterCase.UnitTest.csproj" Id="ab0d3481-5009-47ba-8fa6-efd0002ffc78" />
+</Solution>
