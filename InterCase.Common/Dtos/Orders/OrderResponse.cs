@@ -1,6 +1,5 @@
 namespace InterCase.Common.Dtos.Orders
 {
-    // Id = entity'nin PublicId'si; long Id API'ye çıkmaz
     public sealed record OrderResponse(
         Guid Id,
         string UserId,

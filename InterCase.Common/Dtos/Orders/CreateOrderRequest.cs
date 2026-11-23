@@ -1,6 +1,5 @@
 namespace InterCase.Common.Dtos.Orders
 {
-    // required: alan JSON'da yoksa model bağlama 400 döner
     public sealed record CreateOrderRequest
     {
         public required string UserId { get; init; }
