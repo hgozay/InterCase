@@ -1,0 +1,24 @@
+@model WorkerStatusViewModel
+
+<div class="worker-status"
+     data-worker-status
+     data-url="@Url.Action("WorkerStatus", "System")"
+     data-running="@(Model.IsDown ? "false" : "true")">
+    @if (Model.IsDown)
+    {
+        <div class="alert alert-warning" role="alert">
+            <strong>@UiText.WorkerDownTitle</strong>
+            <span>@UiText.WorkerDownText</span>
+            <span class="worker-steps-title">@UiText.WorkerStartTitle</span>
+            <ul class="worker-steps">
+                <li>@UiText.WorkerStartInfrastructure <code class="command">docker compose up -d</code></li>
+                <li>@UiText.WorkerStartVisualStudio</li>
+                <li>@UiText.WorkerStartTerminal <code class="command">dotnet run --project InterCase.Worker</code></li>
+            </ul>
+            @if (Model.Status!.LastHeartbeatAt is { } lastHeartbeat)
+            {
+                <span class="alert-meta">@UiText.WorkerLastSeen: @DisplayFormat.Date(lastHeartbeat) @DisplayFormat.Clock(lastHeartbeat)</span>
+            }
+        </div>
+    }
+</div>

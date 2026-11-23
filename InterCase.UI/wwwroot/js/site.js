@@ -5,6 +5,9 @@
     var MAX_POLL_FAILURES = 5;
     var pollTimer = null;
     var pollFailures = 0;
+    var WORKER_POLL_DOWN_MS = 5000;
+    var WORKER_POLL_UP_MS = 15000;
+    var workerTimer = null;
 
     function newGuid() {
         var bytes = new Uint8Array(16);
@@ -122,11 +125,72 @@
             });
     }
 
+    function currentWorkerStatus() {
+        return document.querySelector('[data-worker-status]');
+    }
+
+    function scheduleWorkerPoll(delay) {
+        clearTimeout(workerTimer);
+        var status = currentWorkerStatus();
+        if (!status) {
+            return;
+        }
+
+        if (delay === undefined) {
+            delay = status.getAttribute('data-running') === 'false' ? WORKER_POLL_DOWN_MS : WORKER_POLL_UP_MS;
+        }
+        workerTimer = setTimeout(pollWorker, delay);
+    }
+
+    function pollWorker() {
+        if (document.hidden) {
+            return;
+        }
+
+        var status = currentWorkerStatus();
+        if (!status) {
+            return;
+        }
+
+        fetch(status.getAttribute('data-url'), {
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (response) {
+                if (response.status === 401) {
+                    return null;
+                }
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+                return response.text();
+            })
+            .then(function (html) {
+                if (html === null) {
+                    return;
+                }
+
+                var template = document.createElement('template');
+                template.innerHTML = html.trim();
+                var next = template.content.firstElementChild;
+                var current = currentWorkerStatus();
+                if (next && current && next.getAttribute('data-running') !== current.getAttribute('data-running')) {
+                    current.replaceWith(next);
+                }
+                scheduleWorkerPoll();
+            })
+            .catch(function () {
+                scheduleWorkerPoll(WORKER_POLL_UP_MS);
+            });
+    }
+
     document.addEventListener('visibilitychange', function () {
         if (!document.hidden) {
             schedulePoll(0);
+            scheduleWorkerPoll(0);
         }
     });
 
     schedulePoll(POLL_INTERVAL_MS);
+    scheduleWorkerPoll();
 })();

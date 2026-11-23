@@ -93,6 +93,7 @@ try
     {
         options.WorkerCount = services.GetRequiredService<IOptions<HangfireOptions>>().Value.WorkerCount;
         options.ServerName = "intercase-worker";
+        options.HeartbeatInterval = WorkerHeartbeat.Interval;
     });
 
     builder.Services.AddHostedService<OrderPlacedConsumer>();

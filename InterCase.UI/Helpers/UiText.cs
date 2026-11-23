@@ -107,6 +107,22 @@ namespace InterCase.UI.Helpers
         public static string PageOf(int page, int totalPages) => $"{page} / {totalPages}";
         public static string TimeZoneNote => Pick("Times are in Turkey time (UTC+3).", "Saatler Türkiye saatiyle (UTC+3).");
 
+        public static string WorkerDownTitle => Pick("The worker is not running", "Worker çalışmıyor");
+        public static string WorkerDownText => Pick(
+            "New orders wait in the queue as Pending. Once the worker starts, it processes them on its own.",
+            "Yeni siparişler kuyrukta Beklemede kalır. Worker açılınca bekleyen siparişleri kendisi işler.");
+        public static string WorkerStartTitle => Pick("To start it:", "Çalıştırmak için:");
+        public static string WorkerStartInfrastructure => Pick(
+            "PostgreSQL, Redis and RabbitMQ must be up (in the repository root):",
+            "PostgreSQL, Redis ve RabbitMQ açık olmalı (repo kökünde):");
+        public static string WorkerStartVisualStudio => Pick(
+            "Visual Studio: right-click InterCase.Worker → Debug → Start New Instance.",
+            "Visual Studio: InterCase.Worker projesine sağ tıklayın → Debug → Start New Instance.");
+        public static string WorkerStartTerminal => Pick(
+            "Or in a terminal (in the repository root):",
+            "Ya da terminalde (repo kökünde):");
+        public static string WorkerLastSeen => Pick("Last heartbeat", "Son sinyal");
+
         public static string ApiUnavailable => Pick(
             "Could not reach the API. Make sure InterCase.API is running.",
             "API'ye ulaşılamadı. InterCase.API'nin çalıştığından emin olun.");

@@ -67,6 +67,10 @@
     </header>
 
     <main class="container main">
+        @if (isAuthenticated)
+        {
+            @await Component.InvokeAsync("WorkerStatus")
+        }
         @RenderBody()
     </main>
 

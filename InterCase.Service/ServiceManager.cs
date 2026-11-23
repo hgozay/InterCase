@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Hangfire;
 using InterCase.Common;
 using InterCase.Repository.Interfaces;
 using InterCase.Service.Interfaces;
 using InterCase.Service.Services.DbServices;
+using InterCase.Service.Services.OtherServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -17,6 +19,7 @@ namespace InterCase.Service
         IOptions<CacheOptions> cacheOptions,
         IOptions<ProcessingOptions> processingOptions,
         TimeProvider timeProvider,
+        JobStorage jobStorage,
         ILoggerFactory loggerFactory) : IServiceManager
     {
         private readonly Lazy<IUserService> _user = new(() => new UserService(
@@ -40,11 +43,16 @@ namespace InterCase.Service
             repositoryManager,
             mapper));
 
+        private readonly Lazy<IWorkerStatusService> _worker = new(() => new WorkerStatusService(
+            jobStorage,
+            timeProvider));
+
         public IUserService User => _user.Value;
         public IOrderService Order => _order.Value;
         public INotificationService Notification => _notification.Value;
         public ICacheService Cache => cache;
         public IQueueService Queue => queue;
+        public IWorkerStatusService Worker => _worker.Value;
 
         public int SaveChanges() => repositoryManager.SaveChanges();
 

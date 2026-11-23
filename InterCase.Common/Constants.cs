@@ -21,6 +21,12 @@
         public const int OrderProcessing = 3;
     }
 
+    public static class WorkerHeartbeat
+    {
+        public static readonly TimeSpan Interval = TimeSpan.FromSeconds(10);
+        public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
+    }
+
     public static class RecurringJobIds
     {
         public const string RepublishStaleOrders = "republish-stale-orders";

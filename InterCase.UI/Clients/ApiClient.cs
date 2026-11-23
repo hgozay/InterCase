@@ -7,6 +7,7 @@ using InterCase.Common.Dtos.Notifications;
 using InterCase.Common.Dtos.Orders;
 using InterCase.Common.Dtos.Paging;
 using InterCase.Common.Dtos.Users;
+using InterCase.Common.Dtos.Workers;
 using InterCase.UI.Helpers;
 using InterCase.UI.Models;
 
@@ -40,6 +41,9 @@ namespace InterCase.UI.Clients
 
         public Task<ApiResult<List<OrderResponse>>> GetOrdersAsync(Guid userId, CancellationToken ct) =>
             SendAsync<List<OrderResponse>>(HttpMethod.Get, $"orders/{userId}", null, ct);
+
+        public Task<ApiResult<WorkerStatusResponse>> GetWorkerStatusAsync(CancellationToken ct) =>
+            SendAsync<WorkerStatusResponse>(HttpMethod.Get, "system/worker", null, ct);
 
         public Task<ApiResult<PagedResponse<OrderLogResponse>>> GetOrderLogsAsync(Guid userId, int page, int pageSize, CancellationToken ct) =>
             SendAsync<PagedResponse<OrderLogResponse>>(HttpMethod.Get, $"orders/{userId}/logs?page={page}&pageSize={pageSize}", null, ct);

@@ -541,6 +541,35 @@ code {
     color: var(--info);
 }
 
+.alert-warning {
+    border-color: #f1d4a8;
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.worker-status .alert {
+    margin-bottom: 16px;
+}
+
+.worker-steps-title {
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+.alert .worker-steps {
+    display: grid;
+    gap: 6px;
+}
+
+.alert .command {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .8);
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
 .data-list {
     min-width: 0;
     container: data-list / inline-size;

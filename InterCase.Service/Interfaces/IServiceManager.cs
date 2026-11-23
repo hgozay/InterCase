@@ -7,6 +7,7 @@ namespace InterCase.Service.Interfaces
         INotificationService Notification { get; }
         ICacheService Cache { get; }
         IQueueService Queue { get; }
+        IWorkerStatusService Worker { get; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync(CancellationToken ct = default);
