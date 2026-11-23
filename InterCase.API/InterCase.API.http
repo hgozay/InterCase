@@ -1,6 +1,40 @@
 @InterCase.API_HostAddress = http://localhost:5047
+@userId = 3f2b8c1e-0d4a-4c8e-9b7a-2f6d5e1c9a10
+@productId = 9d1e4a7c-5b2f-4e8d-a6c3-7f0b1d2e3c4a
 
-GET {{InterCase.API_HostAddress}}/weatherforecast/
-Accept: application/json
+# @name token
+POST {{InterCase.API_HostAddress}}/auth/token
+Content-Type: application/json
+
+{
+  "username": "demo",
+  "password": "Demo123!"
+}
 
 ###
+
+POST {{InterCase.API_HostAddress}}/orders
+Authorization: Bearer {{token.response.body.$.accessToken}}
+Content-Type: application/json
+Accept-Language: tr
+
+{
+  "userId": "{{userId}}",
+  "productId": "{{productId}}",
+  "quantity": 2,
+  "paymentMethod": "CreditCard"
+}
+
+###
+
+GET {{InterCase.API_HostAddress}}/orders/{{userId}}
+Authorization: Bearer {{token.response.body.$.accessToken}}
+
+###
+
+PUT {{InterCase.API_HostAddress}}/language
+Content-Type: application/json
+
+{
+  "language": "tr"
+}

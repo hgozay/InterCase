@@ -2,8 +2,8 @@ namespace InterCase.Common
 {
     public sealed record OrderPlacedMessage(
         long OrderId,
-        string UserId,
-        string ProductId,
+        Guid UserId,
+        Guid ProductId,
         int Quantity,
         PaymentMethod PaymentMethod,
         DateTime CreatedAt,

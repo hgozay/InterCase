@@ -13,9 +13,9 @@ namespace InterCase.Common.Helpers
         public static class Keys
         {
             public const string UserIdRequired = "UserIdRequired";
-            public const string UserIdMaxLength = "UserIdMaxLength";
+            public const string UserIdEmpty = "UserIdEmpty";
             public const string ProductIdRequired = "ProductIdRequired";
-            public const string ProductIdMaxLength = "ProductIdMaxLength";
+            public const string ProductIdEmpty = "ProductIdEmpty";
             public const string QuantityRequired = "QuantityRequired";
             public const string QuantityRange = "QuantityRange";
             public const string PaymentMethodRequired = "PaymentMethodRequired";
@@ -26,14 +26,21 @@ namespace InterCase.Common.Helpers
             public const string LanguageNotSupported = "LanguageNotSupported";
             public const string InvalidValue = "InvalidValue";
             public const string InvalidRequestBody = "InvalidRequestBody";
+            public const string ValidationFailed = "ValidationFailed";
+            public const string BadRequest = "BadRequest";
+            public const string Unauthorized = "Unauthorized";
+            public const string Forbidden = "Forbidden";
+            public const string ResourceNotFound = "ResourceNotFound";
+            public const string UnexpectedError = "UnexpectedError";
+            public const string InvalidCredentials = "InvalidCredentials";
         }
 
         private static readonly Dictionary<string, Dictionary<string, string>> Messages = new()
         {
             [Keys.UserIdRequired] = new() { [English] = "userId is required.", [Turkish] = "userId zorunludur." },
-            [Keys.UserIdMaxLength] = new() { [English] = "userId must be at most 64 characters.", [Turkish] = "userId en fazla 64 karakter olabilir." },
+            [Keys.UserIdEmpty] = new() { [English] = "userId cannot be an empty GUID.", [Turkish] = "userId boş GUID olamaz." },
             [Keys.ProductIdRequired] = new() { [English] = "productId is required.", [Turkish] = "productId zorunludur." },
-            [Keys.ProductIdMaxLength] = new() { [English] = "productId must be at most 64 characters.", [Turkish] = "productId en fazla 64 karakter olabilir." },
+            [Keys.ProductIdEmpty] = new() { [English] = "productId cannot be an empty GUID.", [Turkish] = "productId boş GUID olamaz." },
             [Keys.QuantityRequired] = new() { [English] = "quantity is required.", [Turkish] = "quantity zorunludur." },
             [Keys.QuantityRange] = new() { [English] = "quantity must be between 1 and 1000.", [Turkish] = "quantity 1 ile 1000 arasında olmalıdır." },
             [Keys.PaymentMethodRequired] = new() { [English] = "paymentMethod is required.", [Turkish] = "paymentMethod zorunludur." },
@@ -43,7 +50,14 @@ namespace InterCase.Common.Helpers
             [Keys.LanguageRequired] = new() { [English] = "language is required.", [Turkish] = "language zorunludur." },
             [Keys.LanguageNotSupported] = new() { [English] = "language must be one of: en, tr.", [Turkish] = "language şu değerlerden biri olmalıdır: en, tr." },
             [Keys.InvalidValue] = new() { [English] = "{0} has an invalid value.", [Turkish] = "{0} için geçersiz bir değer gönderildi." },
-            [Keys.InvalidRequestBody] = new() { [English] = "The request body is missing or is not valid JSON.", [Turkish] = "İstek gövdesi eksik ya da geçerli bir JSON değil." }
+            [Keys.InvalidRequestBody] = new() { [English] = "The request body is missing or is not valid JSON.", [Turkish] = "İstek gövdesi eksik ya da geçerli bir JSON değil." },
+            [Keys.ValidationFailed] = new() { [English] = "One or more validation errors occurred.", [Turkish] = "Bir ya da daha fazla doğrulama hatası oluştu." },
+            [Keys.BadRequest] = new() { [English] = "The request is invalid.", [Turkish] = "İstek geçersiz." },
+            [Keys.Unauthorized] = new() { [English] = "Authentication is required.", [Turkish] = "Bu işlem için kimlik doğrulaması gerekiyor." },
+            [Keys.Forbidden] = new() { [English] = "You do not have permission to perform this action.", [Turkish] = "Bu işlemi yapma yetkiniz yok." },
+            [Keys.ResourceNotFound] = new() { [English] = "The requested resource was not found.", [Turkish] = "İstenen kayıt bulunamadı." },
+            [Keys.UnexpectedError] = new() { [English] = "An unexpected error occurred.", [Turkish] = "Beklenmeyen bir hata oluştu." },
+            [Keys.InvalidCredentials] = new() { [English] = "Username or password is incorrect.", [Turkish] = "Kullanıcı adı ya da şifre hatalı." }
         };
 
         public static string CurrentLanguage => Normalize(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);

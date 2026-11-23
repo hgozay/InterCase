@@ -45,7 +45,7 @@ namespace InterCase.Service.Services.DbServices
         protected override Task OnDeletedAsync(Order order, CancellationToken ct) =>
             cache.RemoveAsync(CacheKeys.OrdersByUser(order.UserId));
 
-        public async Task<IReadOnlyList<OrderResponse>> GetByUserIdAsync(string userId, CancellationToken ct = default)
+        public async Task<IReadOnlyList<OrderResponse>> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
         {
             var key = CacheKeys.OrdersByUser(userId);
             var cached = await cache.GetAsync<List<OrderResponse>>(key);

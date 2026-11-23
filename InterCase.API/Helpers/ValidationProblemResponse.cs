@@ -13,8 +13,10 @@ namespace InterCase.API.Helpers
 
             foreach (var (key, entry) in context.ModelState)
             {
+                var field = ToFieldName(key);
+
                 foreach (var error in entry.Errors)
-                    modelState.AddModelError(key, string.IsNullOrEmpty(error.ErrorMessage) ? DescribeInvalidInput(key) : error.ErrorMessage);
+                    modelState.AddModelError(field, string.IsNullOrEmpty(error.ErrorMessage) ? DescribeInvalidInput(field) : error.ErrorMessage);
             }
 
             var problemDetailsFactory = context.HttpContext.RequestServices.GetRequiredService<ProblemDetailsFactory>();
@@ -23,13 +25,15 @@ namespace InterCase.API.Helpers
             return new BadRequestObjectResult(problem) { ContentTypes = { "application/problem+json" } };
         }
 
-        private static string DescribeInvalidInput(string key)
+        private static string ToFieldName(string key)
         {
             var field = key.TrimStart('$').TrimStart('.');
+            return string.IsNullOrEmpty(field) ? key : field;
+        }
 
-            return string.IsNullOrEmpty(field)
+        private static string DescribeInvalidInput(string field) =>
+            field.StartsWith('$') || string.IsNullOrEmpty(field)
                 ? Localization.Get(Localization.Keys.InvalidRequestBody)
                 : Localization.Format(Localization.Keys.InvalidValue, field);
-        }
     }
 }

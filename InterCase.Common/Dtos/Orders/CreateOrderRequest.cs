@@ -6,12 +6,12 @@ namespace InterCase.Common.Dtos.Orders
     public sealed record CreateOrderRequest
     {
         [Required(ErrorMessage = Localization.Keys.UserIdRequired)]
-        [MaxLength(64, ErrorMessage = Localization.Keys.UserIdMaxLength)]
-        public string UserId { get; init; } = string.Empty;
+        [NotEmptyGuid(ErrorMessage = Localization.Keys.UserIdEmpty)]
+        public Guid? UserId { get; init; }
 
         [Required(ErrorMessage = Localization.Keys.ProductIdRequired)]
-        [MaxLength(64, ErrorMessage = Localization.Keys.ProductIdMaxLength)]
-        public string ProductId { get; init; } = string.Empty;
+        [NotEmptyGuid(ErrorMessage = Localization.Keys.ProductIdEmpty)]
+        public Guid? ProductId { get; init; }
 
         [Required(ErrorMessage = Localization.Keys.QuantityRequired)]
         [Range(1, 1000, ErrorMessage = Localization.Keys.QuantityRange)]

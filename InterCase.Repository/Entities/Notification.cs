@@ -13,8 +13,7 @@ namespace InterCase.Repository.Entities
         [DeleteBehavior(DeleteBehavior.Restrict)]
         public Order Order { get; set; } = null!;
 
-        [MaxLength(64)]
-        public required string UserId { get; set; }
+        public required Guid UserId { get; set; }
 
         [MaxLength(32)]
         public required string Channel { get; set; }

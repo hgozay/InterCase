@@ -2,7 +2,7 @@
 {
     public static class CacheKeys
     {
-        public static string OrdersByUser(string userId) => $"orders:user:{userId}";
+        public static string OrdersByUser(Guid userId) => $"orders:user:{userId}";
         public static string OrderLog(long orderId) => $"order:{orderId}:log";
     }
 
