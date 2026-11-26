@@ -33,5 +33,19 @@ namespace InterCase.Repository.Repositories
             Query(trackChanges: false)
                 .Where(o => o.Status == OrderStatus.Pending && o.CreatedAt < olderThanUtc)
                 .ToListAsync(ct);
+
+        public async Task<bool> TryChangeStatusAsync(long id, OrderStatus status, DateTime changedAt, CancellationToken ct = default)
+        {
+            DateTime? processedAt = status == OrderStatus.Processed ? changedAt : null;
+
+            var updated = await Context.Set<Order>()
+                .Where(o => o.Id == id && !o.IsDeleted && o.Status != OrderStatus.Processed)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(o => o.Status, status)
+                    .SetProperty(o => o.UpdatedAt, changedAt)
+                    .SetProperty(o => o.ProcessedAt, o => processedAt ?? o.ProcessedAt), ct);
+
+            return updated == 1;
+        }
     }
 }

@@ -31,6 +31,10 @@ namespace InterCase.UnitTest.Helpers
         {
             Repositories.Order.Returns(Orders);
             Repositories.User.Returns(Users);
+            Repositories.Notification.Returns(Notifications);
+
+            Notifications.When(r => r.AddAsync(Arg.Any<Notification>(), Arg.Any<CancellationToken>()))
+                .Do(call => AddedNotifications.Add(call.Arg<Notification>()));
 
             Orders.When(r => r.AddAsync(Arg.Any<Order>(), Arg.Any<CancellationToken>()))
                 .Do(call => AddedOrders.Add(call.Arg<Order>()));
@@ -58,10 +62,12 @@ namespace InterCase.UnitTest.Helpers
         public IRepositoryManager Repositories { get; } = Substitute.For<IRepositoryManager>();
         public IOrderRepository Orders { get; } = Substitute.For<IOrderRepository>();
         public IUserRepository Users { get; } = Substitute.For<IUserRepository>();
+        public INotificationRepository Notifications { get; } = Substitute.For<INotificationRepository>();
         public ICacheService Cache { get; } = Substitute.For<ICacheService>();
         public IQueueService Queue { get; } = Substitute.For<IQueueService>();
         public FakeTimeProvider Time { get; } = new(new DateTimeOffset(2026, 11, 23, 12, 0, 0, TimeSpan.Zero));
         public List<Order> AddedOrders { get; } = [];
+        public List<Notification> AddedNotifications { get; } = [];
         public User User { get; }
 
         public OrderService CreateService(ICacheService? cache = null) => new(
@@ -92,9 +98,24 @@ namespace InterCase.UnitTest.Helpers
         public Order StoreOrder(OrderStatus status = OrderStatus.Pending)
         {
             var order = CreateOrder(status);
-            Orders.GetByIdAsync(order.Id, true, Arg.Any<CancellationToken>()).Returns(order);
+            Orders.GetByIdAsync(order.Id, Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(order);
             Orders.GetByPublicIdAsync(order.PublicId, true, Arg.Any<CancellationToken>()).Returns(order);
+            Orders.TryChangeStatusAsync(order.Id, Arg.Any<OrderStatus>(), Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
+                .Returns(call => ChangeStatus(order, call.ArgAt<OrderStatus>(1), call.ArgAt<DateTime>(2)));
             return order;
+        }
+
+        private static bool ChangeStatus(Order order, OrderStatus status, DateTime changedAt)
+        {
+            if (order.IsDeleted || order.Status == OrderStatus.Processed)
+                return false;
+
+            order.Status = status;
+            order.UpdatedAt = changedAt;
+            if (status == OrderStatus.Processed)
+                order.ProcessedAt = changedAt;
+
+            return true;
         }
 
         private void ApplyAuditInfo()

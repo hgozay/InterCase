@@ -93,7 +93,7 @@ namespace InterCase.Service.Services.DbServices
 
         public async Task ProcessAsync(long orderId, CancellationToken ct = default)
         {
-            var order = await RepositoryManager.Order.GetByIdAsync(orderId, trackChanges: true, ct);
+            var order = await RepositoryManager.Order.GetByIdAsync(orderId, trackChanges: false, ct);
             if (order is null)
             {
                 Logger.LogWarning("Order {OrderId} was not found; nothing to process", orderId);
@@ -103,50 +103,65 @@ namespace InterCase.Service.Services.DbServices
             if (order.Status == OrderStatus.Processed)
             {
                 Logger.LogInformation("Order {OrderId} was already processed", orderId);
+                await WriteProcessedLogAsync(order, order.ProcessedAt!.Value);
+                return;
             }
-            else
+
+            if (!await RepositoryManager.Order.TryChangeStatusAsync(order.Id, OrderStatus.Processing, timeProvider.GetUtcNow().UtcDateTime, ct))
             {
-                order.Status = OrderStatus.Processing;
-                await RepositoryManager.SaveChangesAsync(ct);
-
-                await Task.Delay(TimeSpan.FromSeconds(processingOptions.Value.DelaySeconds), timeProvider, ct);
-
-                var processedAt = timeProvider.GetUtcNow().UtcDateTime;
-                var notification = new Notification
-                {
-                    UserId = order.UserId,
-                    Channel = NotificationChannels.Console,
-                    Message = string.Format(
-                        CultureInfo.InvariantCulture,
-                        Localization.Get(Localization.Keys.OrderProcessedNotification, Localization.DefaultLanguage),
-                        order.PublicId),
-                    SentAt = processedAt
-                };
-
-                order.Status = OrderStatus.Processed;
-                order.ProcessedAt = processedAt;
-                order.Notifications.Add(notification);
-                await RepositoryManager.SaveChangesAsync(ct);
-
-                Logger.LogInformation("Notification sent to user {UserId} via {Channel}: {Message}", order.User.PublicId, notification.Channel, notification.Message);
+                Logger.LogInformation("Order {OrderId} was processed by another job; skipping", orderId);
+                return;
             }
 
-            await cache.SetStringAsync(
-                CacheKeys.OrderLog(order.Id),
-                $"Order {order.Id} processed at {order.ProcessedAt!.Value.ToString("O", CultureInfo.InvariantCulture)}");
-            await cache.RemoveAsync(CacheKeys.OrdersByUser(order.User.PublicId));
+            await Task.Delay(TimeSpan.FromSeconds(processingOptions.Value.DelaySeconds), timeProvider, ct);
+
+            var processedAt = timeProvider.GetUtcNow().UtcDateTime;
+            var notification = new Notification
+            {
+                OrderId = order.Id,
+                UserId = order.UserId,
+                Channel = NotificationChannels.Console,
+                Message = string.Format(
+                    CultureInfo.InvariantCulture,
+                    Localization.Get(Localization.Keys.OrderProcessedNotification, Localization.DefaultLanguage),
+                    order.PublicId),
+                SentAt = processedAt
+            };
+
+            await RepositoryManager.BeginTransactionAsync(ct);
+            try
+            {
+                if (!await RepositoryManager.Order.TryChangeStatusAsync(order.Id, OrderStatus.Processed, processedAt, ct))
+                {
+                    await RepositoryManager.RollbackTransactionAsync();
+                    Logger.LogInformation("Order {OrderId} was processed by another job; skipping", orderId);
+                    return;
+                }
+
+                await RepositoryManager.Notification.AddAsync(notification, ct);
+                await RepositoryManager.SaveChangesAsync(ct);
+                await RepositoryManager.CommitTransactionAsync(ct);
+            }
+            catch
+            {
+                await RepositoryManager.RollbackTransactionAsync();
+                throw;
+            }
+
+            Logger.LogInformation("Notification sent to user {UserId} via {Channel}: {Message}", order.User.PublicId, notification.Channel, notification.Message);
+            await WriteProcessedLogAsync(order, processedAt);
         }
 
         public async Task MarkFailedAsync(long orderId, CancellationToken ct = default)
         {
-            var order = await RepositoryManager.Order.GetByIdAsync(orderId, trackChanges: true, ct);
-            if (order is null || order.Status == OrderStatus.Processed)
+            var order = await RepositoryManager.Order.GetByIdAsync(orderId, trackChanges: false, ct);
+            if (order is null)
                 return;
 
-            order.Status = OrderStatus.Failed;
-            await RepositoryManager.SaveChangesAsync(ct);
-            await cache.RemoveAsync(CacheKeys.OrdersByUser(order.User.PublicId));
+            if (!await RepositoryManager.Order.TryChangeStatusAsync(order.Id, OrderStatus.Failed, timeProvider.GetUtcNow().UtcDateTime, ct))
+                return;
 
+            await cache.RemoveAsync(CacheKeys.OrdersByUser(order.User.PublicId));
             Logger.LogWarning("Order {OrderId} marked as Failed", orderId);
         }
 
@@ -173,6 +188,14 @@ namespace InterCase.Service.Services.DbServices
                 Logger.LogInformation("Republished {Published} of {Stale} orders pending since before {OlderThan}", published, staleOrders.Count, olderThan);
 
             return published;
+        }
+
+        private async Task WriteProcessedLogAsync(Order order, DateTime processedAt)
+        {
+            await cache.SetStringAsync(
+                CacheKeys.OrderLog(order.Id),
+                $"Order {order.Id} processed at {processedAt.ToString("O", CultureInfo.InvariantCulture)}");
+            await cache.RemoveAsync(CacheKeys.OrdersByUser(order.User.PublicId));
         }
 
         private static void EnsurePending(Order order)
